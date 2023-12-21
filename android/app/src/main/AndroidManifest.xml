@@ -17,7 +17,7 @@
     </queries>
     <application
         android:icon="@mipmap/ic_launcher"
-        android:label="Homely App"
+        android:label="Eat Homely"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         android:exported="true"
@@ -47,7 +47,6 @@
          <!--   <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
                 android:resource="@drawable/launch_background" />-->
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -63,7 +62,6 @@
             android:name="com.dexterous.flutterlocalnotifications.ForegroundService"
             android:exported="false"
             android:stopWithTask="false"/>
-
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default_notification_channel"/>

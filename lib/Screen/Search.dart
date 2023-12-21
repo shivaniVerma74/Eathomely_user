@@ -1890,7 +1890,7 @@ class _SearchState extends State<Search> with TickerProviderStateMixin {
                                 Padding(
                                   padding: EdgeInsets.only(
                                       left: 14, top: 10, bottom: 8),
-                                  child: Text("All Nearby Restaurant",
+                                  child: Text("All Nearby Home Kitchens",
                                       style: TextStyle(
                                           color: Theme.of(context)
                                               .colorScheme

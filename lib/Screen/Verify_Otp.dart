@@ -515,18 +515,28 @@ class _MobileOTPState extends State<VerifyOtp> with TickerProviderStateMixin {
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                   color: Theme.of(context).colorScheme.fontColor,
                   fontWeight: FontWeight.normal)),
-        ));
+        ),
+    );
   }
 
   mobText() {
     return Padding(
       padding: EdgeInsetsDirectional.only(
           bottom: 10.0, start: 20.0, end: 20.0, top: 10.0),
-      child: Center(
-        child: Text("+91-${widget.mobileNumber}",
-            style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                color: Theme.of(context).colorScheme.fontColor,
-                fontWeight: FontWeight.normal)),
+      child: Column(
+        children: [
+          Center(
+            child: Text("+91-${widget.mobileNumber}",
+                style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                    color: Theme.of(context).colorScheme.fontColor,
+                    fontWeight: FontWeight.normal)),
+          ),
+          SizedBox(height: 5,),
+          Text("OTP: ${widget.otp}",
+              style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                  color: Theme.of(context).colorScheme.fontColor,
+                  fontWeight: FontWeight.normal)),
+        ],
       ),
     );
   }

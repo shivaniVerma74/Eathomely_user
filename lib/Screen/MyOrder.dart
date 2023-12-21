@@ -319,12 +319,10 @@ class StateMyOrder extends State<MyOrder> with TickerProviderStateMixin {
               if (activeStatus == awaitingPayment) activeStatus = "awaiting";
               parameter[ACTIVE_STATUS] = activeStatus;
             }
-
-            print("get order api and para ${getOrderApi} and ${parameter}");
+            print("get order api and para $getOrderApi and $parameter");
             Response response =
                 await post(getOrderApi, body: parameter, headers: headers)
                     .timeout(Duration(seconds: timeOut));
-
             var getdata = json.decode(response.body);
             bool error = getdata["error"];
             print(getOrderApi.toString());
@@ -332,10 +330,8 @@ class StateMyOrder extends State<MyOrder> with TickerProviderStateMixin {
             print(getdata.toString());
             isGettingdata = false;
             if (offset == 0) isNodata = error;
-
             if (!error) {
               // total = int.parse(getdata["total"]);
-
               //  if ((offset) < total) {
               var data = getdata["data"];
               if (data.length != 0) {

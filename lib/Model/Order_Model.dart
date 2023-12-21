@@ -159,6 +159,7 @@ class OrderItem {
       price,
       subTotal,
       status,
+      activeStatus,
       image,
       varientId,
       isCancle,
@@ -189,6 +190,7 @@ class OrderItem {
 
   OrderItem({
     this.qty,
+    this.activeStatus,
     this.id,
     this.startdate,this.totaldelivery,
     this.name,
@@ -235,6 +237,7 @@ class OrderItem {
     return new OrderItem(
       id: json[ID],
       qty: json[QUANTITY],
+      activeStatus:  json[ACTIVE_STATUS],
       startdate: json['startdate'],
       totaldelivery: json['totaldelivery'],
       name: json[NAME],

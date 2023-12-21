@@ -146,10 +146,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       return getSetting();
     });
     // _getAddress();
-
     buttonController = new AnimationController(
         duration: new Duration(milliseconds: 2000), vsync: this);
-
     buttonSqueezeanimation = new Tween(
       begin: deviceWidth! * 0.7,
       end: 50.0,
@@ -1970,11 +1968,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
     if (_isNetworkAvail) {
       try {
         var parameter = {USER_ID: CUR_USERID, SAVE_LATER: save};
-        print("checking response here ${parameter} and ${getCartApi}");
-        Response response =
-            await post(getCartApi, body: parameter, headers: headers)
-                .timeout(Duration(seconds: timeOut));
-
+        print("checking response here $parameter and $getCartApi");
+        Response response = await post(getCartApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
         var getdata = json.decode(response.body);
         bool error = getdata["error"];
         String? msg = getdata["message"];
@@ -1984,8 +1979,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             cgst = getdata['cgst'];
             sgst = getdata['sgst'];
           });
-          totalTax =
-              double.parse(getdata['tax_amount'].toString()).toStringAsFixed(2);
+          totalTax = double.parse(getdata['tax_amount'].toString()).toStringAsFixed(2);
           // cartID = getdata[0]['cart_id'].toString();
           // print('_______cartID____${cartID}__________');
           print("nononon ${getdata[SUB_TOTAL]}");
@@ -1994,31 +1988,21 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             payMethod = "Free";
           }
           newDeliveryCharge = int.parse(getdata['delivery_charge'].toString());
-          print(
-              "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv ${newDeliveryCharge}");
+          print("vvvvvvvvvvvv $newDeliveryCharge");
           newSellerId = data[0]['seller_id'];
-          print("new Seller id here now ${newSellerId}");
+          print("new Seller id here now $newSellerId");
           // delCharge = double.parse(newDeliveryCharge.toString());
           oriPrice = double.parse(getdata[SUB_TOTAL]);
           platformFee = double.parse(getdata['platform_fee']);
           packagingCharge = double.parse(getdata['total_packing_charge']);
           taxPer = double.parse(getdata[TAX_PER]);
-          totalPrice = delCharge +
-              oriPrice +
-              double.parse(totalTax) +
-              packagingCharge +
-              platformFee;
+          totalPrice = delCharge + oriPrice + double.parse(totalTax) + packagingCharge + platformFee;
           print('___________${totalPrice}____kk______');
-
-          List<SectionModel> cartList = (data as List)
-              .map((data) => new SectionModel.fromCart(data))
-              .toList();
+          List<SectionModel> cartList = (data as List).map((data) => new SectionModel.fromCart(data)).toList();
           context.read<CartProvider>().setCartlist(cartList);
-
           if (getdata.containsKey(PROMO_CODES)) {
             var promo = getdata[PROMO_CODES];
-            promoList =
-                (promo as List).map((e) => new Promo.fromJson(e)).toList();
+            promoList = (promo as List).map((e) => new Promo.fromJson(e)).toList();
           }
           for (int i = 0; i < cartList.length; i++)
             _controller.add(new TextEditingController());
@@ -2029,7 +2013,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           setState(() {
             _isCartLoad = false;
           });
-
         isAdreesChange ? _getAddress2() : _getAddress();
       } on TimeoutException catch (_) {
         setSnackbar(getTranslated(context, 'somethingMSg')!, _scaffoldKey);
@@ -3267,10 +3250,10 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                   const SizedBox(height: 5,),
                                                   address(),
                                                   payment(),
+                                                  cartList[0].productList![0].selfPickup == "1" ?
                                                   pickupCustomer(() async {
                                                     setState(() {
                                                       if (pickCustomer) {
-
                                                         pickCustomer = false;
                                                         totalPrice += (delCharge*days);
                                                       } else {
@@ -3278,7 +3261,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                         totalPrice -= (delCharge*days);
                                                       }
                                                     });
-                                                  }),
+                                                  }):
                                                   cartItems(cartList,setState),
                                                   // promo(),
                                                   orderSummary(cartList),
@@ -3451,17 +3434,15 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
   }
 
   doPayment() {
-    print("payment method here ${payMethod}");
+    print("payment method here $payMethod");
 
     if (payMethod == getTranslated(context, 'CC_AVENUE')) {
       // placeOrder('');
-
       checkAddressForDelivery();
       // _checkOrderShouldBePlacedOrNot ();
     } else if (payMethod == getTranslated(context, 'PAYPAL_LBL')) {
       placeOrder('');
     } else if (payMethod == getTranslated(context, 'RAZORPAY_LBL'))
-
     // _checkOrderShouldBePlacedOrNot ();
     // razorpayPayment();
     // else if (payMethod == getTranslated(context, 'PAYSTACK_LBL'))
@@ -3486,7 +3467,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                     }*/
     else if (payMethod == getTranslated(context, 'BANKTRAN'))
       bankTransfer();
-    else if (payMethod == "Cash On Delivery") {
+    else if (payMethod == getTranslated(context, 'COD_LBL')) {
+      print("cod level is ");
       placeOrder('');
     } else if (payMethod == "Wallet") {
       placeOrder('');
@@ -3516,17 +3498,11 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
         var parameter = {
           USER_ID: CUR_USERID,
         };
-
-        Response response = await post(checkOrderShouldBePlacedApi,
-                body: parameter, headers: headers)
-            .timeout(Duration(seconds: timeOut));
-
+        Response response = await post(checkOrderShouldBePlacedApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
-
           print('${parameter}___parametercheck_____');
           print('${response.body}___parametercheckbody_____');
-
           bool error = getdata["error"];
           if (!error) {
             getPhonpayURL();
@@ -3970,7 +3946,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       }
       String? payVia;
       if (payMethod == getTranslated(context, 'COD_LBL'))
-        payVia = "COD";
+        payVia = "UPI";
       else if (payMethod == getTranslated(context, 'PAYPAL_LBL'))
         payVia = "PayPal";
       else if (payMethod == getTranslated(context, 'PAYUMONEY_LBL'))
@@ -3994,7 +3970,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       }else if(payMethod=="Free"){
         payVia = "Free";
       }
-
       try {
         var parameter = {
           USER_ID: CUR_USERID,
@@ -4002,8 +3977,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           PRODUCT_VARIENT_ID: varientId,
           QUANTITY: quantity,
           TOTAL: (oriPrice*days).toString(),
-          FINAL_TOTAL:
-              payVia == 'Wallet' ? usedBal.toString() : totalPrice.toString(),
+          FINAL_TOTAL: payVia == 'Wallet' ? usedBal.toString() : totalPrice.toString(),
           DEL_CHARGE: pickCustomer ? "0" : (delCharge*days).toString(),
           // TAX_AMT: taxAmt.toString(),
           TAX_PER: taxPer.toString(),
@@ -4011,6 +3985,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           ADD_ID: selAddress,
           ISWALLETBALUSED: isUseWallet! ? "1" : "0",
           WALLET_BAL_USED: usedBal.toString(),
+          'urgent_delivery': choose.toString(),
           ORDER_NOTE: noteC.text,
           'add_on_id': finalIdss,
           'seller_id': cartList[0].productList![0].seller_id,
@@ -4047,7 +4022,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           parameter[PROMOCODE] = promocode;
           parameter[PROMO_DIS] = promoAmt.toString();
         }
-
         if (payMethod == getTranslated(context, 'PAYPAL_LBL')) {
           parameter[ACTIVE_STATUS] = WAITING;
         } else if (payMethod == getTranslated(context, 'STRIPE_LBL')) {
@@ -4716,9 +4690,9 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             children: [
               Row(
                 children: [
-                  Icon(pickCustomer
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank),
+                  Icon(
+                      pickCustomer
+                      ? Icons.check_box : Icons.check_box_outline_blank),
                   Padding(
                     padding: const EdgeInsetsDirectional.only(start: 8.0),
                     child: Text(
@@ -4728,7 +4702,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                           color: Theme.of(context).colorScheme.fontColor,
                           fontWeight: FontWeight.bold),
                     ),
-                  )
+                  ),
                 ],
               ),
             ],
@@ -4883,9 +4857,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                 Text(
                                   "SGST(${taxPer / 2} %)",
                                   style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2),
+                                      color: Theme.of(context).colorScheme.lightBlack2),
                                 ),
                                 Text(
                                   CUR_CURRENCY! +
@@ -4914,8 +4886,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                             Text(
                               CUR_CURRENCY! + " " + "${(double.parse(totalTax)*days).round()}",
                               style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.fontColor,
+                                  color: Theme.of(context).colorScheme.fontColor,
                                   fontWeight: FontWeight.bold),
                             )
                           ],
@@ -5015,7 +4986,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
         Response response =
             await post(validatePromoApi, body: parameter, headers: headers)
                 .timeout(Duration(seconds: timeOut));
-        print("paramters here ${validatePromoApi} and ${parameter}");
+        print("paramters here $validatePromoApi and $parameter");
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
 
@@ -5033,7 +5004,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             print("final discount is here now ${data['final_discount']}");
             promoAmt = double.parse(data["final_discount"]);
             promocode = data["promo_code"];
-            print("checking promocode data here now ${promocode}");
+            print("checking promocode data here now $promocode");
             isPromoValid = true;
 
             if (promoAmt == "" ||
@@ -5145,88 +5116,91 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                   elevation: 2.0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                  content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                            padding: EdgeInsets.fromLTRB(20.0, 20.0, 0, 2.0),
-                            child: Text(
-                              getTranslated(context, 'CONFIRM_ORDER')!,
-                              style: Theme.of(this.context)
-                                  .textTheme
-                                  .subtitle1!
-                                  .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .fontColor),
-                            )),
-                        Divider(
-                            color: Theme.of(context).colorScheme.lightBlack),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    getTranslated(context, 'SUBTOTAL')!,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .subtitle2!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .lightBlack2),
-                                  ),
-                                  Text(
-                                    CUR_CURRENCY! +
-                                        " " +
-                                        (oriPrice*days).toStringAsFixed(2),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .subtitle2!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .fontColor,
-                                            fontWeight: FontWeight.bold),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Packaging Charge",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .subtitle2!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .lightBlack2),
-                                  ),
-                                  Text(
-                                    CUR_CURRENCY! +
-                                        " " +
-                                        (packagingCharge*days).toStringAsFixed(2),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .subtitle2!
-                                        .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .fontColor,
-                                            fontWeight: FontWeight.bold),
-                                  )
-                                ],
-                              ),
-                             /* Row(
+                  content:
+                     StatefulBuilder(builder: (context, setState) {
+                       return
+                         Column(
+                             mainAxisSize: MainAxisSize.min,
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               Padding(
+                                   padding: EdgeInsets.fromLTRB(20.0, 20.0, 0, 2.0),
+                                   child: Text(
+                                     getTranslated(context, 'CONFIRM_ORDER')!,
+                                     style: Theme.of(this.context)
+                                         .textTheme
+                                         .subtitle1!
+                                         .copyWith(
+                                         color: Theme.of(context)
+                                             .colorScheme
+                                             .fontColor),
+                                   )),
+                               Divider(
+                                   color: Theme.of(context).colorScheme.lightBlack),
+                               Padding(
+                                 padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
+                                 child: Column(
+                                   mainAxisSize: MainAxisSize.min,
+                                   children: [
+                                     Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           getTranslated(context, 'SUBTOTAL')!,
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! +
+                                               " " +
+                                               (oriPrice*days).toStringAsFixed(2),
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     ),
+                                     Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           "Packaging Charge",
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! +
+                                               " " +
+                                               (packagingCharge*days).toStringAsFixed(2),
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     ),
+                                     /* Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
@@ -5255,233 +5229,263 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                   )
                                 ],
                               ),*/
-                              !pickCustomer
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          getTranslated(
-                                              context, 'DELIVERY_CHARGE')!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .lightBlack2),
-                                        ),
-                                        Text(
-                                          CUR_CURRENCY! +
-                                              " " +
-                                              (delCharge*days).toStringAsFixed(2),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .fontColor,
-                                                  fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  : const SizedBox(),
-                              addressList[selectedAddress!]
-                                      .state
-                                      .toString()
-                                      .toLowerCase()
-                                      .contains("maharashtra")
-                                  ? Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "CGST(${taxPer / 2} %)",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .lightBlack2),
-                                            ),
-                                            Text(
-                                              CUR_CURRENCY! +
-                                                  " " +
-                                                  "${((double.parse(totalTax) / 2)*days).round().toStringAsFixed(2)}",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .fontColor,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "SGST(${taxPer / 2} %)",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .lightBlack2),
-                                            ),
-                                            Text(
-                                              CUR_CURRENCY! +
-                                                  " " +
-                                                  "${((double.parse(totalTax) / 2)*days).round().toStringAsFixed(2)}",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .fontColor,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    )
-                                  : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "IGST($taxPer %)",
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .lightBlack2),
-                                        ),
-                                        Text(
-                                          CUR_CURRENCY! + " " + "${(double.parse(totalTax)*days).round()}",
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .fontColor,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    ),
-                              isPromoValid!
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          getTranslated(
-                                              context, 'PROMO_CODE_DIS_LBL')!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .lightBlack2),
-                                        ),
-                                        Text(
-                                          CUR_CURRENCY! +
-                                              " " +
-                                              promoAmt.toStringAsFixed(2),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .fontColor,
-                                                  fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  : Container(),
-                              isUseWallet!
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          getTranslated(context, 'WALLET_BAL')!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .lightBlack2),
-                                        ),
-                                        Text(
-                                          CUR_CURRENCY! +
-                                              " " +
-                                              usedBal.toStringAsFixed(2),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .fontColor,
-                                                  fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  : Container(),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      getTranslated(context, 'TOTAL_PRICE')!,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .subtitle2!
-                                          .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .lightBlack2),
-                                    ),
-                                    Text(
-                                      CUR_CURRENCY! +
-                                          " ${totalPrice.toStringAsFixed(2)}",
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .fontColor,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  /* decoration: BoxDecoration(
+                                     !pickCustomer
+                                         ? Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           getTranslated(
+                                               context, 'DELIVERY_CHARGE')!,
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! +
+                                               " " +
+                                               (delCharge*days).toStringAsFixed(2),
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     )
+                                         : const SizedBox(),
+                                     addressList[selectedAddress!]
+                                         .state
+                                         .toString()
+                                         .toLowerCase()
+                                         .contains("maharashtra")
+                                         ? Column(
+                                       children: [
+                                         Row(
+                                           mainAxisAlignment:
+                                           MainAxisAlignment.spaceBetween,
+                                           children: [
+                                             Text(
+                                               "CGST(${taxPer / 2} %)",
+                                               style: TextStyle(
+                                                   color: Theme.of(context)
+                                                       .colorScheme
+                                                       .lightBlack2),
+                                             ),
+                                             Text(
+                                               CUR_CURRENCY! +
+                                                   " " +
+                                                   "${((double.parse(totalTax) / 2)*days).round().toStringAsFixed(2)}",
+                                               style: TextStyle(
+                                                   color: Theme.of(context)
+                                                       .colorScheme
+                                                       .fontColor,
+                                                   fontWeight: FontWeight.bold),
+                                             )
+                                           ],
+                                         ),
+                                         Row(
+                                           mainAxisAlignment:
+                                           MainAxisAlignment.spaceBetween,
+                                           children: [
+                                             Text(
+                                               "SGST(${taxPer / 2} %)",
+                                               style: TextStyle(
+                                                   color: Theme.of(context)
+                                                       .colorScheme
+                                                       .lightBlack2),
+                                             ),
+                                             Text(
+                                               CUR_CURRENCY! +
+                                                   " " +
+                                                   "${((double.parse(totalTax) / 2)*days).round().toStringAsFixed(2)}",
+                                               style: TextStyle(
+                                                   color: Theme.of(context)
+                                                       .colorScheme
+                                                       .fontColor,
+                                                   fontWeight: FontWeight.bold),
+                                             )
+                                           ],
+                                         ),
+                                       ],
+                                     )
+                                         : Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           "IGST($taxPer %)",
+                                           style: TextStyle(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! + " " + "${(double.parse(totalTax)*days).round()}",
+                                           style: TextStyle(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     ),
+                                     isPromoValid!
+                                         ? Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           getTranslated(
+                                               context, 'PROMO_CODE_DIS_LBL')!,
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! +
+                                               " " +
+                                               promoAmt.toStringAsFixed(2),
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     )
+                                         : Container(),
+                                     isUseWallet!
+                                         ? Row(
+                                       mainAxisAlignment:
+                                       MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           getTranslated(context, 'WALLET_BAL')!,
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .lightBlack2),
+                                         ),
+                                         Text(
+                                           CUR_CURRENCY! +
+                                               " " +
+                                               usedBal.toStringAsFixed(2),
+                                           style: Theme.of(context)
+                                               .textTheme
+                                               .subtitle2!
+                                               .copyWith(
+                                               color: Theme.of(context)
+                                                   .colorScheme
+                                                   .fontColor,
+                                               fontWeight: FontWeight.bold),
+                                         )
+                                       ],
+                                     )
+                                         : Container(),
+                                     Padding(
+                                       padding:
+                                       const EdgeInsets.symmetric(vertical: 8.0),
+                                       child: Row(
+                                         mainAxisAlignment:
+                                         MainAxisAlignment.spaceBetween,
+                                         children: [
+                                           Text(
+                                             getTranslated(context, 'TOTAL_PRICE')!,
+                                             style: Theme.of(context)
+                                                 .textTheme
+                                                 .subtitle2!
+                                                 .copyWith(
+                                                 color: Theme.of(context)
+                                                     .colorScheme
+                                                     .lightBlack2),
+                                           ),
+                                           Text(
+                                             CUR_CURRENCY! +
+                                                 " ${totalPrice.toStringAsFixed(2)}",
+                                             style: TextStyle(
+                                                 color: Theme.of(context)
+                                                     .colorScheme
+                                                     .fontColor,
+                                                 fontWeight: FontWeight.bold),
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                     Container(
+                                       padding: EdgeInsets.symmetric(vertical: 10),
+                                       /* decoration: BoxDecoration(
                                     color: colors.primary.withOpacity(0.1),
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(10),
                                     ),
                                   ),*/
-                                  child: TextField(
-                                    controller: noteC,
-                                    style:
-                                        Theme.of(context).textTheme.subtitle2,
-                                    decoration: InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      border: InputBorder.none,
-                                      filled: true,
-                                      fillColor:
-                                          colors.primary.withOpacity(0.1),
-                                      //isDense: true,
-                                      hintText: getTranslated(context, 'NOTE'),
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
-                      ]),
+                                       child: TextField(
+                                         controller: noteC,
+                                         style:
+                                         Theme.of(context).textTheme.subtitle2,
+                                         decoration: InputDecoration(
+                                           contentPadding:
+                                           EdgeInsets.symmetric(horizontal: 10),
+                                           border: InputBorder.none,
+                                           filled: true,
+                                           fillColor:
+                                           colors.primary.withOpacity(0.1),
+                                           //isDense: true,
+                                           hintText: getTranslated(context, 'NOTE'),
+                                         ),
+                                       ),
+                                     ),
+                                     Row(
+                                       children: [
+                                         Radio(
+                                             value: "schedule",
+                                             groupValue: choose,
+                                             activeColor: colors.primary,
+                                             onChanged: (val) {
+                                               setState(() {
+                                                 choose = val;
+                                                 otpOnOff = true;
+                                                 print("selected radio is == $choose");
+                                               });
+                                             }),
+                                         Text("${getTranslated(context, 'SCHEDULE')}", style: TextStyle(fontSize: 13),),
+                                         Radio(
+                                             value: "immediately",
+                                             groupValue: choose,
+                                             activeColor: colors.primary,
+                                             onChanged: (val) {
+                                               setState(() {
+                                                 choose = val;
+                                                 otpOnOff = false;
+                                                 print("selected radio is == $choose");
+                                               });
+                                             }),
+                                         Text("${getTranslated(context, 'IMMADIATELY')}", style: TextStyle(fontSize: 13)),
+                                       ],
+                                     )
+                                   ],
+                                 ),
+                               ),
+                             ]);
+                     },),
                   actions: <Widget>[
                     new TextButton(
                         child: Text(getTranslated(context, 'CANCEL')!,
@@ -5518,6 +5522,9 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           return Container();
         });
   }
+
+  dynamic choose = "mobile";
+  bool otpOnOff = true;
 
   void bankTransfer() {
     showGeneralDialog(

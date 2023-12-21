@@ -67,6 +67,7 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
       pincodeC,
       addressC,
       addressNewC,
+      addressTwoNewC,
       landmarkC,
       stateC,
       countryC,
@@ -1020,7 +1021,7 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                       .subtitle2!
                       .copyWith(color: Theme.of(context).colorScheme.fontColor),
                   focusNode: addFocus,
-                  controller: addressNewC,
+                  controller: addressTwoNewC,
                   validator: (val) => validateField(
                       val!, getTranslated(context, 'FIELD_REQUIRED')),
                   onSaved: (String? value) {
@@ -1030,10 +1031,10 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                     _fieldFocusChange(context, addFocus!, locationFocus);
                   },
                   decoration: InputDecoration(
-                    label: Text(getTranslated(context, "ADDRESS_LBL")!),
+                    label: Text(getTranslated(context, "ADDRESS_LBL2")!),
                     fillColor: Theme.of(context).colorScheme.white,
                     isDense: true,
-                    hintText: getTranslated(context, 'ADDRESS_LBL'),
+                    hintText: getTranslated(context, 'ADDRESS_LBL2'),
                     border: InputBorder.none,
                     // suffixIcon: IconButton(
                     //   onPressed: () {},
@@ -1062,8 +1063,6 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
         pincodeC!.text   = place.postalCode ?? '';
         _cityController.text =  place.locality ?? '' ;
         stateC!.text = place.administrativeArea ?? '' ;
-
-
         print('${place.name}____________');
         print('${place.postalCode}____________');
         print('${place.administrativeArea}____________');
@@ -1360,41 +1359,29 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
         TYPE: type,
         ISDEFAULT: checkedDefault.toString() == "true" ? "1" : "0",
         LATITUDE: latitude,
-        LONGITUDE: longitude
+        LONGITUDE: longitude,
+        "full_address": addressTwoNewC!.text,
       };
       if (widget.update!) data[ID] = addressList[widget.index!].id;
       print("checking data here now ok ${data}");
       print(data);
-
-      Response response = await post(
-              widget.update! ? updateAddressApi : getAddAddressApi,
-              body: data,
-              headers: headers)
-          .timeout(Duration(seconds: timeOut));
-
+      Response response = await post(widget.update! ? updateAddressApi : getAddAddressApi, body: data, headers: headers).timeout(Duration(seconds: timeOut));
       print("checking data here now okkk ${response.statusCode}");
       print(widget.update! ? updateAddressApi : getAddAddressApi);
-
       if (response.statusCode == 200) {
         var getdata = json.decode(response.body);
-
         bool error = getdata["error"];
         String? msg = getdata["message"];
-
         await buttonController!.reverse();
-
         if (!error) {
           var data = getdata["data"];
-
           print('${getdata["data"]}');
-
           if (widget.update!) {
             if (checkedDefault.toString() == "true" ||
                 addressList.length == 1) {
               for (User i in addressList) {
                 i.isDefault = "0";
               }
-
               addressList[widget.index!].isDefault = "1";
               double amount =
                   double.tryParse(addressList[selectedAddress!].freeAmt!) !=

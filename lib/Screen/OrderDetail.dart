@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:homely_user/Helper/Session.dart';
 import 'package:homely_user/Model/Order_Model.dart';
+import 'package:homely_user/Screen/MyOrder.dart';
 import 'package:homely_user/Screen/Seller_Details.dart';
 import 'package:homely_user/Screen/live_track.dart';
 import 'package:file_picker/file_picker.dart';
@@ -19,6 +21,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../Helper/AppBtn.dart';
 import '../Helper/Color.dart';
@@ -86,6 +89,10 @@ class StateOrder extends State<OrderDetail>
     //   return getTaxTotal();
     // });
     getTaxTotal();
+    _razorpay = Razorpay();
+    _razorpay?.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay?.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay?.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     buttonController = AnimationController(
         duration: Duration(milliseconds: 2000), vsync: this);
     buttonSqueezeanimation = Tween(
@@ -133,6 +140,41 @@ class StateOrder extends State<OrderDetail>
     } on TickerCanceled {}
   }
 
+
+  addTransaction() async{
+    var headers = {
+      'Cookie': 'ci_session=f89ef3ee306fe9eb5b61614a86d69b8d264d6eb9'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse('https://developmentalphawizz.com/eatoz_clone/app/v1/api/add_transaction'));
+    request.fields.addAll({
+      'transaction_type': 'transaction',
+      'user_id': "$CUR_USERID",
+      'order_id': "${widget.model?.id}",
+      'payment_method': 'razorpay',
+      'txn_id': 'rzp_test_1DP5mmOlF5G5ag',
+      'amount': '${widget.model?.payable}',
+      'status': 'success',
+      'message': 'Payment Done'
+      // USER_ID: CUR_USERID,
+      // ORDER_ID: orderID,
+      // TYPE: payMethod,
+      // TXNID: tranId,
+      // AMOUNT: totalPrice.toString(),
+      // STATUS: status,
+      // MSG: msg
+    });
+    print("add transaction parameter ${request.fields}");
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(msg: "Transaction Added Successfully");
+      Navigator.push(context, MaterialPageRoute(builder: (controller) => MyOrder()));
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
   Widget noInternet(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
@@ -168,6 +210,7 @@ class StateOrder extends State<OrderDetail>
 
   @override
   Widget build(BuildContext context) {
+    // print("hjjjjjjjjjjjjjjjjj${widget.model?.itemList[]}");
     deviceHeight = MediaQuery.of(context).size.height;
     deviceWidth = MediaQuery.of(context).size.width;
 
@@ -375,6 +418,7 @@ class StateOrder extends State<OrderDetail>
   }*/
 
   priceDetails() {
+    print("jhgjghggggjgj ${widget.model?.activeStatus}");
     return Card(
         elevation: 0,
         child: Padding(
@@ -435,7 +479,6 @@ class StateOrder extends State<OrderDetail>
                   ],
                 ),
               ),
-
               ///
               //
               //     Padding(
@@ -480,7 +523,6 @@ class StateOrder extends State<OrderDetail>
                   ],
                 ),
               ),
-
               ///
               Padding(
                 padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
@@ -496,7 +538,6 @@ class StateOrder extends State<OrderDetail>
                   ],
                 ),
               ),
-
               // Padding(
               //   padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
               //   child: Row(
@@ -529,10 +570,63 @@ class StateOrder extends State<OrderDetail>
                         style: Theme.of(context).textTheme.button!.copyWith(
                             color: Theme.of(context).colorScheme.lightBlack,
                             fontWeight: FontWeight.bold))
-                  ],
+                       ],
+                     ),
+                   ),
+                  widget.model?.itemList?.first.activeStatus== "delivered" ?
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(
+                        start: 15.0, end: 15.0, top: 5.0),
+                    child: Center(
+                      child: InkWell(
+                        onTap: () {
+                          openCheckout(widget.model!.payable!);
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 90,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                          child: Center(child: Text("Pay" , style: TextStyle(fontSize: 15, color: colors.whiteTemp, fontWeight: FontWeight.w800),)),
+                        ),
+                        ),
+                      ),
+                    )
+                      : SizedBox.shrink()
+            ]
                 ),
-              ),
-            ])));
+        ),
+    );
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    Fluttertoast.showToast(msg: "Payment successfully");
+    addTransaction();
+    // Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+  }
+  void _handlePaymentError(PaymentFailureResponse response) {
+    Fluttertoast.showToast(msg: "Payment cancelled by user");
+  }
+  void _handleExternalWallet(ExternalWalletResponse response) {
+  }
+
+  Razorpay? _razorpay;
+  int? pricerazorpayy;
+  void openCheckout(amount) async {
+    double res = double.parse(amount.toString());
+    pricerazorpayy= int.parse(res.toStringAsFixed(0)) * 100;
+    // Navigator.of(context).pop();
+    var options = {
+      'key': 'rzp_test_1DP5mmOlF5G5ag',
+      'amount': "$pricerazorpayy",
+      'name': 'Homely',
+      'image':'assets/images/Group 165.png',
+      'description': 'Homely',
+    };
+    try {
+      _razorpay?.open(options);
+    } catch (e) {
+      debugPrint('Error: e');
+    }
   }
 
   shippingDetails() {
@@ -3318,7 +3412,7 @@ class StateOrder extends State<OrderDetail>
                                                     },
                                                   );
                                                 }: null,
-                                            child: Text("Order Cancel with in a 2 minute", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                                               child: Text("Order Cancel with in a 2 minute", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                                                   // getTranslated(
                                                   //   context, 'ITEM_CANCEL')!
                                                   ),
@@ -3431,7 +3525,6 @@ class StateOrder extends State<OrderDetail>
 
   @override
   bool get wantKeepAlive => true;
-
   void openBottomSheet(BuildContext context, var productID) {
     showModalBottomSheet(
         shape: RoundedRectangleBorder(

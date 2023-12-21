@@ -13,6 +13,7 @@ class SectionModel {
       shortDesc,
       add_on_id,
       add_on_qty,
+      selfPickup,
       cartID;
   List<Product>? productList;
   List<Promo>? promoList;
@@ -42,6 +43,7 @@ class SectionModel {
       this.selectedId,
       this.filterList,
       this.promoList,
+        this.selfPickup,
       this.add_on_qty});
 
   factory SectionModel.fromJson(Map<String, dynamic> parsedJson) {
@@ -72,6 +74,7 @@ class SectionModel {
         offset: 0,
         totalItem: 0,
         addOns: addsList,
+        selfPickup: parsedJson['self_pickup'],
         filterList: filterList,
         add_on_id: parsedJson['add_on_id'],
         add_on_qty: parsedJson['add_on_qty'],
@@ -96,6 +99,7 @@ class SectionModel {
       subscriptionType: parsedJson['subscription_type'],
       perItemTotal: "0",
       perItemPrice: "0",
+      selfPickup: parsedJson['self_pickup'],
       packingCharge: parsedJson['packing_charge'],
       addOns: addsList,
       add_on_id: parsedJson['add_on_id'],
@@ -156,6 +160,7 @@ class Product {
       attrIds,
       tax,
       categoryId,
+      selfPickup,
       shortDescription,subscriptionProduct,
       qtyStepSize;
   List<String>? itemsCounter;
@@ -218,6 +223,7 @@ class Product {
       this.otherImage,
       this.prVarientList,
       this.attributeList,
+        this.selfPickup,
       this.isFav,
       this.isCancelable,
       this.isReturnable,
@@ -319,6 +325,7 @@ class Product {
       catName: json[CAT_NAME],
       rating: json[RATING],
       noOfRating: json[NO_OF_RATE],
+      selfPickup: json['self_pickup'],
       type: json[TYPE],
       isFav: json[FAV].toString(),
       isCancelable: json[ISCANCLEABLE],
@@ -392,6 +399,7 @@ class Product {
       store_name: json[STORE_NAME],
       seller_id: json[SELLER_ID],
       estimated_time: json["estimated_time"],
+      selfPickup: json['self_pickup'],
       food_person: json["food_person"],
       address: json["address"],
       online: json["online"],

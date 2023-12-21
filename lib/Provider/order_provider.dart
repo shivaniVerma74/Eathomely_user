@@ -24,8 +24,6 @@ class OrderProvider extends ChangeNotifier {
   }
 
   fetchOrderDetails(var userID,[var activeStatus]) async {
-
-
     var parameter = {USER_ID: userID};
     if(activeStatus!="" && activeStatus !=null)
       {

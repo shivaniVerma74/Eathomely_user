@@ -151,6 +151,7 @@ class _HomePageState extends State<HomePage>
                 });
       }
   }
+
   bool _isLoading = true;
   String sortBy = 'p.id', orderBy = "DESC";
   String minPrice = "0", maxPrice = "0";
@@ -180,7 +181,7 @@ class _HomePageState extends State<HomePage>
     if (CUR_USERID != null) parameter[USER_ID] = CUR_USERID!;
 
     parameter[DISCOUNT] = "";
-    print("new paremters here ${parameter} and ${getProductApi}");
+    print("new paremters here $parameter and $getProductApi");
     apiBaseHelper.postAPICall(getProductApi, parameter).then((getdata) {
       bool error = getdata["error"];
       String? msg = getdata["message"];
@@ -345,9 +346,8 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     getCurrentLoc();
-    buttonController = new AnimationController(
-        duration: new Duration(milliseconds: 2000), vsync: this);
-
+    getTodayCat();
+    buttonController = new AnimationController(duration: new Duration(milliseconds: 2000), vsync: this);
     buttonSqueezeanimation = new Tween(
       begin: deviceWidth! * 0.7,
       end: 50.0,
@@ -360,7 +360,6 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
-
     WidgetsBinding.instance!.addPostFrameCallback((_) => _animateSlider());
   }
 
@@ -386,7 +385,6 @@ class _HomePageState extends State<HomePage>
                           left: 8, right: 8, top: 10, bottom: 0),
                       child: _slider(),
                     ),
-
                     // Padding(
                     //   padding: EdgeInsets.only(left: 10),
                     //   child: Text(
@@ -401,8 +399,7 @@ class _HomePageState extends State<HomePage>
 ////////////////////// Today Special Section ////////////////////
                     ///
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 12, top: 16, bottom: 10),
+                      padding: const EdgeInsets.only(left: 12, top: 16, bottom: 10),
                       child: Text(
                         "Today special",
                         style: TextStyle(
@@ -1437,7 +1434,7 @@ class _HomePageState extends State<HomePage>
                 child: catLoading(),
              ),
             ) :
-         todayCatList.length == 0
+            todayCatList.length == 0
             ? Container(
            height: 120,
            width: double.infinity,
@@ -1495,9 +1492,7 @@ class _HomePageState extends State<HomePage>
                             height: 100.0,
                             width: 100.0,
                             fit: BoxFit.cover,
-                            imageErrorBuilder:
-                                (context, error, stackTrace) =>
-                                erroWidget(50),
+                            imageErrorBuilder: (context, error, stackTrace) => erroWidget(50),
                             placeholder: placeHolder(50),
                           ),
                         ),
@@ -1507,17 +1502,8 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           todayCatList[index].name!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .caption!
-                              .copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .fontColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12),
-                          maxLines: 2,
-                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.caption!.copyWith(color: Theme.of(context).colorScheme.fontColor,
+                              fontWeight: FontWeight.w600, fontSize: 10), maxLines: 2, textAlign: TextAlign.center,
                         ),
                         // width: 50,
                       ),
@@ -1659,8 +1645,6 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<Null> callApi() async {
-
-
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       getSetting();
@@ -1670,7 +1654,7 @@ class _HomePageState extends State<HomePage>
       getSeller();
       topRatedRestaurent();
       sponsorRestaurants();
-      getSection();
+      // getSection();
      // getProduct("", "");
        //todaySpecial();
       getOfferImages();
@@ -2398,24 +2382,27 @@ class _HomePageState extends State<HomePage>
     Map parameter = {
       CAT_FILTER: "false",
     };
+    print("tdy special parameter $parameter");
     apiBaseHelper.postAPICall(getTodayCatApi, parameter).then((getdata) {
+      print("wok=rkinggggg");
       bool error = getdata["error"];
       String? msg = getdata["message"];
+      print("message and error $error $msg");
       if (!error) {
         var data = getdata["data"];
         todayCatList =
             (data as List).map((data) => new Product.fromCat(data)).toList();
-
+        print("responsss hereer $getdata $todayCatList");
       } else {
         setSnackbar(msg!, context);
       }
-
       context.read<HomeProvider>().setCatLoading(false);
     }, onError: (error) {
       setSnackbar(error.toString(), context);
       context.read<HomeProvider>().setCatLoading(false);
     });
   }
+
   void getCat() {
     Map parameter = {
       CAT_FILTER: "false",
@@ -2425,15 +2412,11 @@ class _HomePageState extends State<HomePage>
       String? msg = getdata["message"];
       if (!error) {
         var data = getdata["data"];
-
         catList =
             (data as List).map((data) => new Product.fromCat(data)).toList();
-        //
         if (getdata.containsKey("popular_categories")) {
           var data = getdata["popular_categories"];
-          popularList =
-              (data as List).map((data) => new Product.fromCat(data)).toList();
-
+          popularList = (data as List).map((data) => new Product.fromCat(data)).toList();
           if (popularList.length > 0) {
             Product pop =
                 new Product.popular("Popular", imagePath + "popular.svg");
@@ -2444,7 +2427,6 @@ class _HomePageState extends State<HomePage>
       } else {
         setSnackbar(msg!, context);
       }
-
       context.read<HomeProvider>().setCatLoading(false);
     }, onError: (error) {
       setSnackbar(error.toString(), context);
@@ -2585,7 +2567,7 @@ class _HomePageState extends State<HomePage>
                           Padding(
                             padding:
                                 EdgeInsets.only(left: 14, top: 10, bottom: 5),
-                            child: Text("All Nearby Restaurant",
+                            child: Text("All Nearby Home Kitchens",
                                 style: TextStyle(
                                     color:
                                         Theme.of(context).colorScheme.fontColor,
@@ -3275,7 +3257,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Padding(
                       padding: EdgeInsets.only(top: 10, left: 12, bottom: 8),
-                      child: Text('Top Rated HomeKitchen',
+                      child: Text('Top Rated Home Kitchens',
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.fontColor,
                               fontWeight: FontWeight.bold,

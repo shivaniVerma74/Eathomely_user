@@ -1,7 +1,7 @@
 import 'package:homely_user/Model/Section_Model.dart';
 import 'package:homely_user/Model/User.dart';
 
-final String appName = 'Homely App';
+final String appName = 'Eat Homely';
 
 final String  packageName = 'com.homely.user';
 final String androidLink = 'https://play.google.com/store/apps/details?id=';
@@ -22,6 +22,7 @@ const int perPage = 1000;
 //final String baseUrl = 'https://foodontheways.com/New_food/app/v1/api/';
 /*final String baseUrl =
     'https://eatoz.in/app/v1/api/';*/
+
 final String baseUrl = "https://developmentalphawizz.com/eatoz_clone/app/v1/api/";
  //final String baseUrl = "https://developmentalphawizz.com/eatoz/app/v1/api/";
 final String imageUrl = 'https://developmentalphawizz.com/';
@@ -59,9 +60,7 @@ String? razorpayId,
 bool payTesting = true;
 List<SectionModel> sectionList = [];
 List<Product> catList = [];
-
 List<Product> popularList = [];
-
 List<String> tagList = [];
 List<Product> sellerList = [];
 List<Product> topSellerList = [];

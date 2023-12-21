@@ -98,22 +98,20 @@ class _SignUpPageState extends State<SignUp> with TickerProviderStateMixin {
     var headers = {
       'Cookie': 'ci_session=3ad3fc5d67fdee5adffc328c45a5f45ce4796626'
     };
-    var request = http.Request('POST', Uri.parse('${baseUrl}get_cities'));
+    var request = http.Request('POST', Uri.parse('${baseUrl}pincodes'));
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
       var finalResult = await response.stream.bytesToString();
       final jsonResponse = json.decode(finalResult);
       for(var i=0;i< jsonResponse['data'].length;i++){
-        cityList.add(jsonResponse['data'][i]['name']);
+        cityList.add(jsonResponse['data'][i]['zipcode']);
       }
       print("checking data here now first ${cityList}");
-
     }
     else {
       print(response.reasonPhrase);
     }
-
   }
 
 
@@ -220,9 +218,7 @@ class _SignUpPageState extends State<SignUp> with TickerProviderStateMixin {
       };
       print(data.toString());
       Response response =
-          await post(getUserSignUpApi, body: data, headers: headers)
-              .timeout(Duration(seconds: timeOut));
-
+      await post(getUserSignUpApi, body: data, headers: headers).timeout(Duration(seconds: timeOut));
       var getdata = json.decode(response.body);
       bool error = getdata["error"];
       String? msg = getdata["message"];
@@ -230,19 +226,15 @@ class _SignUpPageState extends State<SignUp> with TickerProviderStateMixin {
       if (!error) {
         setSnackbar(getTranslated(context, 'REGISTER_SUCCESS_MSG')!);
         var i = getdata["data"][0];
-
         id = i[ID];
         name = i[USERNAME];
         email = i[EMAIL];
         mobile = i[MOBILE];
         //countrycode=i[COUNTRY_CODE];
         CUR_USERID = id;
-
         // CUR_USERNAME = name;
-
         UserProvider userProvider = context.read<UserProvider>();
         userProvider.setName(name ?? "");
-
         SettingProvider settingProvider = context.read<SettingProvider>();
         settingProvider.saveUserDetail(id!, name, email, mobile, city, area,
             address, pincode, latitude, longitude, "", context);
@@ -755,9 +747,8 @@ class _SignUpPageState extends State<SignUp> with TickerProviderStateMixin {
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child:DropdownButton(
                           isExpanded: true,
-                          hint: Text("Select City",style: TextStyle(fontSize: 14),),
+                          hint: Text("Select Pincode",style: TextStyle(fontSize: 14),),
                           value: selectedCity,
-
                           icon: const Icon(Icons.keyboard_arrow_down),
                           items: cityList.map((String items) {
                             return DropdownMenuItem(
