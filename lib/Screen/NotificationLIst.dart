@@ -251,9 +251,7 @@ class StateNoti extends State<NotificationList> with TickerProviderStateMixin {
           OFFSET: offset.toString(),
         };
 
-        Response response =
-            await post(getNotificationApi, headers: headers, body: parameter)
-                .timeout(Duration(seconds: timeOut));
+        Response response = await post(getNotificationApi, headers: headers, body: parameter).timeout(Duration(seconds: timeOut));
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
           bool error = getdata["error"];

@@ -67,7 +67,6 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
       pincodeC,
       addressC,
       addressNewC,
-      addressTwoNewC,
       landmarkC,
       stateC,
       countryC,
@@ -86,6 +85,7 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
   int? selAreaPos = -1, selCityPos = -1;
   final TextEditingController _areaController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final TextEditingController addressTwoCtr = TextEditingController();
 
   String? _currentAddress;
   _getLocation() async {
@@ -1021,12 +1021,12 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                       .subtitle2!
                       .copyWith(color: Theme.of(context).colorScheme.fontColor),
                   focusNode: addFocus,
-                  controller: addressTwoNewC,
+                  controller: addressTwoCtr,
                   validator: (val) => validateField(
                       val!, getTranslated(context, 'FIELD_REQUIRED')),
-                  onSaved: (String? value) {
-                    address = value;
-                  },
+                  // onSaved: (String? value) {
+                  //   addressTwoCtr = value;
+                  // },
                   onFieldSubmitted: (v) {
                     _fieldFocusChange(context, addFocus!, locationFocus);
                   },
@@ -1360,10 +1360,10 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
         ISDEFAULT: checkedDefault.toString() == "true" ? "1" : "0",
         LATITUDE: latitude,
         LONGITUDE: longitude,
-        "full_address": addressTwoNewC!.text,
+        "full_address": addressTwoCtr.text,
       };
       if (widget.update!) data[ID] = addressList[widget.index!].id;
-      print("checking data here now ok ${data}");
+      print("checking data here now ok $data");
       print(data);
       Response response = await post(widget.update! ? updateAddressApi : getAddAddressApi, body: data, headers: headers).timeout(Duration(seconds: timeOut));
       print("checking data here now okkk ${response.statusCode}");

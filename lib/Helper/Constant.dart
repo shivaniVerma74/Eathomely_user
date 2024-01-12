@@ -36,7 +36,7 @@ List<User> addressList = [];
 List<Promo> promoList = [];
 double totalPrice = 0, oriPrice = 0, delCharge = 0, taxPer = 0, platformFee = 0, packagingCharge = 0;
 int? selectedAddress = 0;
-String? selAddress, payMethod = '', selTime, selDate, promocode;
+String? selAddress, payMethod = '', selTime, selDate, promocode, schedule, immediately;
 bool? isTimeSlot,
     isPromoValid = false,
     isUseWallet = false,

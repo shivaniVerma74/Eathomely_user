@@ -28,6 +28,7 @@ import '../Helper/Color.dart';
 import '../Helper/Constant.dart';
 import '../Helper/String.dart';
 import '../Model/User.dart';
+import 'Login.dart';
 
 class OrderDetail extends StatefulWidget {
   final OrderModel? model;
@@ -53,10 +54,11 @@ class StateOrder extends State<OrderDetail>
   List<User> tempList = [];
   late bool _isCancleable, _isReturnable;
   bool _isProgress = false;
+  bool _isLoading = true;
   int offset = 0;
   int total = 0;
   List<User> reviewList = [];
-  bool isLoadingmore = true;
+  bool isLoadingmore = true, isGettingdata = false, isNodata = false;
   bool _isReturnClick = true;
   String? proId, image;
   final InAppReview _inAppReview = InAppReview.instance;
@@ -78,16 +80,136 @@ class StateOrder extends State<OrderDetail>
     }
   }
 
+  String _searchText = "", _lastsearch = "";
+  String? activeStatus;
+
   double totalTax = 0;
+  Future<Null> getOrder() async {
+    _isNetworkAvail = await isNetworkAvailable();
+    if (_isNetworkAvail) {
+      try {
+        if (isLoadingmore) {
+          if (mounted) {
+            setState(() {
+              isLoadingmore = false;
+              isGettingdata = true;
+              if (offset == 0) {
+                searchList = [];
+              }
+            });
+          }
+
+          if (CUR_USERID != null) {
+            var parameter = {
+              USER_ID: CUR_USERID,
+              OFFSET: offset.toString(),
+              LIMIT: perPage.toString(),
+              SEARCH: _searchText.trim(),
+            };
+            if (activeStatus != null) {
+              if (activeStatus == awaitingPayment) activeStatus = "awaiting";
+              parameter[ACTIVE_STATUS] = activeStatus;
+            }
+            print("get order api and para $getOrderApi and $parameter");
+            Response response =
+                await post(getOrderApi, body: parameter, headers: headers)
+                    .timeout(Duration(seconds: timeOut));
+            var getdata = json.decode(response.body);
+            bool error = getdata["error"];
+            print(getOrderApi.toString());
+            print(parameter.toString());
+            print(getdata.toString());
+            isGettingdata = false;
+            if (offset == 0) isNodata = error;
+            if (!error) {
+              // total = int.parse(getdata["total"]);
+              //  if ((offset) < total) {
+              var data = getdata["data"];
+              if (data.length != 0) {
+                List<OrderModel> items = [];
+                List<OrderModel> allitems = [];
+
+                items.addAll((data as List)
+                    .map((data) => OrderModel.fromJson(data))
+                    .toList());
+
+                allitems.addAll(items);
+
+                for (OrderModel item in items) {
+                  searchList.where((i) => i.id == item.id).map((obj) {
+                    allitems.remove(item);
+                    return obj;
+                  }).toList();
+                }
+                searchList.addAll(allitems);
+
+                searchList.sort((a, b) {
+                  return DateTime.parse(b.dateTime.toString())
+                      .compareTo(DateTime.parse(a.dateTime.toString()));
+                });
+                isLoadingmore = true;
+                offset = offset + perPage;
+              } else {
+                isLoadingmore = false;
+              }
+              // orderList = (data as List)
+              //     .map((data) => new OrderModel.fromJson(data))
+              //     .toList();
+              // searchList.addAll(orderList);
+              // offset = offset + perPage;
+              // }
+            } else {
+              isLoadingmore = false;
+            }
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+                //isLoadingmore = false;
+              });
+            }
+          } else {
+            if (mounted) if (mounted) {
+              setState(() {
+                isLoadingmore = false;
+                //msg = goToLogin;
+              });
+            }
+            Future.delayed(Duration(seconds: 1)).then((_) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Login()),
+              );
+            });
+          }
+        }
+      } on TimeoutException catch (_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            isLoadingmore = false;
+          });
+        }
+        setSnackbar(getTranslated(context, 'somethingMSg')!);
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isNetworkAvail = false;
+          _isLoading = false;
+        });
+      }
+    }
+    return null;
+  }
+
+  int difference = 0;
 
   @override
   void initState() {
     super.initState();
     files.clear();
     reviewPhotos.clear();
-    // Future.delayed(Duration(milliseconds: 200),(){
-    //   return getTaxTotal();
-    // });
+
     getTaxTotal();
     _razorpay = Razorpay();
     _razorpay?.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
@@ -114,16 +236,43 @@ class StateOrder extends State<OrderDetail>
         _selectedTabIndex = _tabController.index;
       });
     });
+
+    int minutesBetween(DateTime from, DateTime to) => to.difference(from).inMinutes;
+    var date1 = DateTime.parse(widget.model!.dateTime.toString());
+    var date2 = DateTime.now();
+     difference = minutesBetween(date1, date2);
+     print("===========newwwwwwwww====$difference===========");
+
+    if(difference <= 2){
+     int sub = difference * 60;
+     Timer.periodic(Duration(seconds: 1), (Timer timer) {
+       print("===========newwwwwwwww====$sub===========");
+
+       if(sub > 120) {
+         difference =  sub~/60;
+         print("time is $sub and diffence $difference");
+         timer.cancel();
+         setState(() {});
+       }else{
+         sub++;
+       }
+      });
+    }
   }
+Timer ? timer ;
+  // void startTimer1(int index) {
+  //   timer = Timer.periodic(Duration(seconds: 1), (_) => );
+  // }
+
 
   getTaxTotal() {
-    if (widget.model!.cgst == "" || widget.model!.cgst == null ) {
+    if (widget.model!.cgst == "" || widget.model!.cgst == null) {
       totalTax = 0.0;
     } else {
-      print(
-          "final values are here ${widget.model!.cgst} and ${widget.model!.sgst}");
+      print("final values are here ${widget.model!.cgst} and ${widget.model!.sgst}");
       totalTax = double.parse(widget.model!.cgst.toString()) +
-          double.parse(widget.model!.sgst.toString()) + double.parse(widget.model!.igst.toString());
+          double.parse(widget.model!.sgst.toString()) +
+          double.parse(widget.model!.igst.toString());
       print("final value here $totalTax");
     }
   }
@@ -140,12 +289,14 @@ class StateOrder extends State<OrderDetail>
     } on TickerCanceled {}
   }
 
-
-  addTransaction() async{
+  addTransaction() async {
     var headers = {
       'Cookie': 'ci_session=f89ef3ee306fe9eb5b61614a86d69b8d264d6eb9'
     };
-    var request = http.MultipartRequest('POST', Uri.parse('https://developmentalphawizz.com/eatoz_clone/app/v1/api/add_transaction'));
+    var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            'https://developmentalphawizz.com/eatoz_clone/app/v1/api/add_transaction'));
     request.fields.addAll({
       'transaction_type': 'transaction',
       'user_id': "$CUR_USERID",
@@ -168,9 +319,9 @@ class StateOrder extends State<OrderDetail>
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
       Fluttertoast.showToast(msg: "Transaction Added Successfully");
-      Navigator.push(context, MaterialPageRoute(builder: (controller) => MyOrder()));
-    }
-    else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (controller) => MyOrder()));
+    } else {
       print(response.reasonPhrase);
     }
   }
@@ -420,181 +571,187 @@ class StateOrder extends State<OrderDetail>
   priceDetails() {
     print("jhgjghggggjgj ${widget.model?.activeStatus}");
     return Card(
-        elevation: 0,
-        child: Padding(
-            padding: EdgeInsets.fromLTRB(0, 15.0, 0, 15.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Padding(
-                  padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                  child: Text(getTranslated(context, 'PRICE_DETAIL')!,
-                      style: Theme.of(context).textTheme.subtitle2!.copyWith(
-                          color: Theme.of(context).colorScheme.fontColor,
-                          fontWeight: FontWeight.bold))),
-              Divider(
-                color: Theme.of(context).colorScheme.lightBlack,
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("${getTranslated(context, 'PRICE_LBL')!} :",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2)),
-                    Text("${CUR_CURRENCY!} ${widget.model!.subTotal!}",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2))
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(getTranslated(context, 'DELIVERY_CHARGE')! + " " + ":",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2)),
-                    Text("+ " + CUR_CURRENCY! + " " + widget.model!.delCharge!,
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2))
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                        getTranslated(context, 'PROMO_CODE_DIS_LBL')! +
-                            " " +
-                            ":",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2)),
-                    Text("- " + CUR_CURRENCY! + " " + widget.model!.promoDis!,
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2))
-                  ],
-                ),
-              ),
-              ///
-              //
-              //     Padding(
-              //       padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-              //       child: Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           Text("SGST" + " " + ":",
-              //               style: Theme.of(context).textTheme.button!.copyWith(
-              //                   color: Theme.of(context).colorScheme.lightBlack2)),
-              //           Text("- " + CUR_CURRENCY! + " " + widget.model!.sgst!,
-              //               style: Theme.of(context).textTheme.button!.copyWith(
-              //                   color: Theme.of(context).colorScheme.lightBlack2))
-              //         ],
-              //       ),
-              //     ),
-              //     Padding(
-              //       padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-              //       child: Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           Text("CGST" + " " + ":",
-              //               style: Theme.of(context).textTheme.button!.copyWith(
-              //                   color: Theme.of(context).colorScheme.lightBlack2)),
-              //           Text("- " + CUR_CURRENCY! + " " + widget.model!.cgst!,
-              //               style: Theme.of(context).textTheme.button!.copyWith(
-              //                   color: Theme.of(context).colorScheme.lightBlack2))
-              //         ],
-              //       ),
-              //     ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Total Tax" + " " + ":",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2)),
-                    Text("+ " + CUR_CURRENCY! + " " + "${totalTax}",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2))
-                  ],
-                ),
-              ),
-              ///
-              Padding(
-                padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(getTranslated(context, 'WALLET_BAL')! + " " + ":",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2)),
-                    Text("- " + CUR_CURRENCY! + " " + widget.model!.walBal!,
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack2))
-                  ],
-                ),
-              ),
-              // Padding(
-              //   padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     children: [
-              //       Text(getTranslated(context, 'PAYABLE') + " " + ":",
-              //           style: Theme.of(context)
-              //               .textTheme
-              //               .button
-              //               .copyWith(color: Theme.of(context).colorScheme.lightBlack2)),
-              //       Text(CUR_CURRENCY + " " + widget.model.payable,
-              //           style: Theme.of(context)
-              //               .textTheme
-              //               .button
-              //               .copyWith(color: Theme.of(context).colorScheme.lightBlack2))
-              //     ],
-              //   ),
-              // ),
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                    start: 15.0, end: 15.0, top: 5.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(getTranslated(context, 'PAYABLE')! + " " + ":",
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack,
-                            fontWeight: FontWeight.bold)),
-                    Text(CUR_CURRENCY! + " " + widget.model!.payable!,
-                        style: Theme.of(context).textTheme.button!.copyWith(
-                            color: Theme.of(context).colorScheme.lightBlack,
-                            fontWeight: FontWeight.bold))
-                       ],
-                     ),
-                   ),
-                  widget.model?.itemList?.first.activeStatus== "delivered" ?
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(
-                        start: 15.0, end: 15.0, top: 5.0),
-                    child: Center(
-                      child: InkWell(
-                        onTap: () {
-                          openCheckout(widget.model!.payable!);
-                        },
-                        child: Container(
-                          height: 40,
-                          width: 90,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
-                          child: Center(child: Text("Pay" , style: TextStyle(fontSize: 15, color: colors.whiteTemp, fontWeight: FontWeight.w800),)),
-                        ),
-                        ),
+      elevation: 0,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(0, 15.0, 0, 15.0),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+              padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+              child: Text(getTranslated(context, 'PRICE_DETAIL')!,
+                  style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.fontColor,
+                      fontWeight: FontWeight.bold))),
+          Divider(
+            color: Theme.of(context).colorScheme.lightBlack,
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("${getTranslated(context, 'PRICE_LBL')!} :",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("${CUR_CURRENCY!} ${widget.model!.subTotal!}",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(getTranslated(context, 'DELIVERY_CHARGE')! + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("+ " + CUR_CURRENCY! + " " + widget.model!.delCharge!,
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(getTranslated(context, 'PROMO_CODE_DIS_LBL')! + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("- " + CUR_CURRENCY! + " " + widget.model!.promoDis!,
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+
+          ///
+          //
+          //     Padding(
+          //       padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //         children: [
+          //           Text("SGST" + " " + ":",
+          //               style: Theme.of(context).textTheme.button!.copyWith(
+          //                   color: Theme.of(context).colorScheme.lightBlack2)),
+          //           Text("- " + CUR_CURRENCY! + " " + widget.model!.sgst!,
+          //               style: Theme.of(context).textTheme.button!.copyWith(
+          //                   color: Theme.of(context).colorScheme.lightBlack2))
+          //         ],
+          //       ),
+          //     ),
+          //     Padding(
+          //       padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //         children: [
+          //           Text("CGST" + " " + ":",
+          //               style: Theme.of(context).textTheme.button!.copyWith(
+          //                   color: Theme.of(context).colorScheme.lightBlack2)),
+          //           Text("- " + CUR_CURRENCY! + " " + widget.model!.cgst!,
+          //               style: Theme.of(context).textTheme.button!.copyWith(
+          //                   color: Theme.of(context).colorScheme.lightBlack2))
+          //         ],
+          //       ),
+          //     ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Total Tax" + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("+ " + CUR_CURRENCY! + " " + "${totalTax}",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+
+          ///
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(getTranslated(context, 'WALLET_BAL')! + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("- " + CUR_CURRENCY! + " " + widget.model!.walBal!,
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+          // Padding(
+          //   padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //     children: [
+          //       Text(getTranslated(context, 'PAYABLE') + " " + ":",
+          //           style: Theme.of(context)
+          //               .textTheme
+          //               .button
+          //               .copyWith(color: Theme.of(context).colorScheme.lightBlack2)),
+          //       Text(CUR_CURRENCY + " " + widget.model.payable,
+          //           style: Theme.of(context)
+          //               .textTheme
+          //               .button
+          //               .copyWith(color: Theme.of(context).colorScheme.lightBlack2))
+          //     ],
+          //   ),
+          // ),
+          Padding(
+            padding:
+                EdgeInsetsDirectional.only(start: 15.0, end: 15.0, top: 5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(getTranslated(context, 'PAYABLE')! + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack,
+                        fontWeight: FontWeight.bold)),
+                Text(CUR_CURRENCY! + " " + widget.model!.payable!,
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack,
+                        fontWeight: FontWeight.bold))
+              ],
+            ),
+          ),
+          widget.model?.itemList?.first.activeStatus == "delivered"
+              ? Padding(
+                  padding: EdgeInsetsDirectional.only(
+                      start: 15.0, end: 15.0, top: 5.0),
+                  child: Center(
+                    child: InkWell(
+                      onTap: () {
+                        openCheckout(widget.model!.payable!);
+                      },
+                      child: Container(
+                        height: 40,
+                        width: 90,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: colors.primary),
+                        child: Center(
+                            child: Text(
+                          "Pay",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: colors.whiteTemp,
+                              fontWeight: FontWeight.w800),
+                        )),
                       ),
-                    )
-                      : SizedBox.shrink()
-            ]
-                ),
-        ),
+                    ),
+                  ),
+                )
+              : SizedBox.shrink()
+        ]),
+      ),
     );
   }
 
@@ -603,23 +760,24 @@ class StateOrder extends State<OrderDetail>
     addTransaction();
     // Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
   }
+
   void _handlePaymentError(PaymentFailureResponse response) {
     Fluttertoast.showToast(msg: "Payment cancelled by user");
   }
-  void _handleExternalWallet(ExternalWalletResponse response) {
-  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {}
 
   Razorpay? _razorpay;
   int? pricerazorpayy;
   void openCheckout(amount) async {
     double res = double.parse(amount.toString());
-    pricerazorpayy= int.parse(res.toStringAsFixed(0)) * 100;
+    pricerazorpayy = int.parse(res.toStringAsFixed(0)) * 100;
     // Navigator.of(context).pop();
     var options = {
       'key': 'rzp_test_1DP5mmOlF5G5ag',
       'amount': "$pricerazorpayy",
       'name': 'Homely',
-      'image':'assets/images/Group 165.png',
+      'image': 'assets/images/Group 165.png',
       'description': 'Homely',
     };
     try {
@@ -1705,7 +1863,9 @@ class StateOrder extends State<OrderDetail>
       try {
         var parameter = {ORDERID: id, STATUS: status};
         print('cancel oredr parameteer ${parameter}__________');
-        var response = await post(api, body: parameter, headers: headers).timeout(Duration(seconds: timeOut),
+        var response =
+            await post(api, body: parameter, headers: headers).timeout(
+          Duration(seconds: timeOut),
         );
         print('___________${response.body}__________');
         var getdata = json.decode(response.body);
@@ -1716,7 +1876,6 @@ class StateOrder extends State<OrderDetail>
             Navigator.pop(context, 'update');
           });
         }
-
         if (mounted) {
           setState(() {
             _isProgress = false;
@@ -1956,9 +2115,9 @@ class StateOrder extends State<OrderDetail>
                     ),
                   )
                 : Container(),
-             bankTransfer(model),
-             getSingleProduct(model, ''),
-             model.addonList!.length == 0
+            bankTransfer(model),
+            getSingleProduct(model, ''),
+            model.addonList!.length == 0
                 ? SizedBox()
                 : Container(
                     color: Colors.white,
@@ -2125,10 +2284,7 @@ class StateOrder extends State<OrderDetail>
         : Container();
   }
 
-
   bool isButtonVisible = true;
-
-
 
   getSingleProduct(OrderModel model, String activeStatus) {
     var count = 0;
@@ -2169,11 +2325,11 @@ class StateOrder extends State<OrderDetail>
             }
             if (orderItem.listStatus!.contains(ASSIGNED)) {
               cDate =
-              orderItem.listDate![orderItem.listStatus!.indexOf(ASSIGNED)];
+                  orderItem.listDate![orderItem.listStatus!.indexOf(ASSIGNED)];
             }
             if (orderItem.listStatus!.contains(PREPAIRED)) {
               cDate =
-              orderItem.listDate![orderItem.listStatus!.indexOf(PREPAIRED)];
+                  orderItem.listDate![orderItem.listStatus!.indexOf(PREPAIRED)];
             }
             if (orderItem.listStatus!.contains(RETURNED)) {
               rDate =
@@ -2236,18 +2392,23 @@ class StateOrder extends State<OrderDetail>
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           "Restaurant Name",
                                           style: TextStyle(
-                                              color: Theme.of(context).colorScheme.lightBlack,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .lightBlack,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           "Restaurant Contact",
                                           style: TextStyle(
-                                              color: Theme.of(context).colorScheme.lightBlack,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .lightBlack,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         // Text(
@@ -2263,7 +2424,8 @@ class StateOrder extends State<OrderDetail>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .lightBlack,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               )
                                             : Container(),
                                         orderItem.tracking_id! != ""
@@ -2273,7 +2435,8 @@ class StateOrder extends State<OrderDetail>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .lightBlack,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               )
                                             : Container(),
                                       ],
@@ -2297,8 +2460,8 @@ class StateOrder extends State<OrderDetail>
                                           onTap: () {
                                             print(orderItem.seller_rating
                                                 .toString());
-                                            print(
-                                                orderItem.store_name.toString());
+                                            print(orderItem.store_name
+                                                .toString());
                                             print(orderItem.seller_profile);
                                             print(orderItem.seller_name);
                                             print(orderItem.seller_id);
@@ -2349,8 +2512,9 @@ class StateOrder extends State<OrderDetail>
                                                         "${orderItem.courier_agency!}",
                                                     style: const TextStyle(
                                                         color: colors.primary,
-                                                        decoration: TextDecoration
-                                                            .underline),
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                     recognizer:
                                                         TapGestureRecognizer()
                                                           ..onTap = () async {
@@ -2409,9 +2573,8 @@ class StateOrder extends State<OrderDetail>
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       onPressed: () {
-
-                                        openDriverBottomSheet(
-                                            context, orderItem.deliveryBoyId, model.id);
+                                        openDriverBottomSheet(context,
+                                            orderItem.deliveryBoyId, model.id);
                                       },
                                       icon: Icon(Icons.rate_review_outlined,
                                           color: colors.primary),
@@ -2514,7 +2677,8 @@ class StateOrder extends State<OrderDetail>
                                   (orderItem.listStatus!.contains(DELIVERD) &&
                                           orderItem.isReturn == "1" &&
                                           orderItem.isAlrReturned == "0")
-                                      ? SizedBox()/*Padding(
+                                      ? SizedBox()
+                                      /*Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8.0),
                                           child: OutlinedButton(
@@ -2685,7 +2849,6 @@ class StateOrder extends State<OrderDetail>
                             Divider(
                               color: Theme.of(context).colorScheme.lightBlack,
                             ),
-
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
@@ -2724,7 +2887,8 @@ class StateOrder extends State<OrderDetail>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .lightBlack,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               )
                                             : Container(),
                                         orderItem.tracking_id! != ""
@@ -2734,7 +2898,8 @@ class StateOrder extends State<OrderDetail>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .lightBlack,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               )
                                             : Container(),
                                       ],
@@ -2758,8 +2923,8 @@ class StateOrder extends State<OrderDetail>
                                           onTap: () {
                                             print(orderItem.seller_rating
                                                 .toString());
-                                            print(
-                                                orderItem.store_name.toString());
+                                            print(orderItem.store_name
+                                                .toString());
                                             print(orderItem.seller_profile);
                                             print(orderItem.seller_name);
                                             print(orderItem.seller_id);
@@ -2810,8 +2975,9 @@ class StateOrder extends State<OrderDetail>
                                                         "${orderItem.courier_agency!}",
                                                     style: const TextStyle(
                                                         color: colors.primary,
-                                                        decoration: TextDecoration
-                                                            .underline),
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline),
                                                     recognizer:
                                                         TapGestureRecognizer()
                                                           ..onTap = () async {
@@ -2868,10 +3034,11 @@ class StateOrder extends State<OrderDetail>
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       onPressed: () {
-                                        print('___________${orderItem.deliveryBoyId}___2_______');
+                                        print(
+                                            '___________${orderItem.deliveryBoyId}___2_______');
 
-                                        openDriverBottomSheet(
-                                            context, orderItem.deliveryBoyId, model.id);
+                                        openDriverBottomSheet(context,
+                                            orderItem.deliveryBoyId, model.id);
                                       },
                                       icon: Icon(Icons.rate_review_outlined,
                                           color: colors.primary),
@@ -2977,7 +3144,7 @@ class StateOrder extends State<OrderDetail>
                                   (orderItem.listStatus!.contains(DELIVERD) &&
                                           orderItem.isReturn == "1" &&
                                           orderItem.isAlrReturned == "0")
-                                      ? SizedBox() *//*Padding(
+                                      ? SizedBox() */ /*Padding(
                                           padding:
                                               const EdgeInsets.only(left: 8.0),
                                           child: OutlinedButton(
@@ -3055,7 +3222,7 @@ class StateOrder extends State<OrderDetail>
                                             child: Text(getTranslated(
                                                 context, 'ITEM_RETURN')!),
                                           ),
-                                        )*//*
+                                        )*/ /*
                                       : Container(),*/
                               ],
                             ),
@@ -3098,13 +3265,12 @@ class StateOrder extends State<OrderDetail>
             val = orderItem.varient_values!.split(',');
           }
 
-          int minutesBetween(DateTime from, DateTime to) =>
-              to.difference(from).inMinutes;
+         // int minutesBetween(DateTime from, DateTime to) => to.difference(from).inMinutes;
 
           var date1 = DateTime.parse(widget.model!.dateTime.toString());
           var date2 = DateTime.now();
-          final difference = minutesBetween(date1, date2);
-          print("difference between both date ${difference}");
+        //  final difference = minutesBetween(date1, date2);
+          print("difference between both date $difference");
           return Column(
             children: [
               productItem(orderItem, model),
@@ -3162,18 +3328,12 @@ class StateOrder extends State<OrderDetail>
                                       Text(
                                         "Restaurant Name",
                                         style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .lightBlack,
-                                            fontWeight: FontWeight.bold),
+                                            color: Theme.of(context).colorScheme.lightBlack, fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         "Restaurant Contact",
                                         style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .lightBlack,
-                                            fontWeight: FontWeight.bold),
+                                            color: Theme.of(context).colorScheme.lightBlack, fontWeight: FontWeight.bold),
                                       ),
                                       // Text(
                                       //   "${getTranslated(context, "OTP")!} : ",
@@ -3206,7 +3366,8 @@ class StateOrder extends State<OrderDetail>
                                 ),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       InkWell(
                                         child: Text(
@@ -3219,8 +3380,7 @@ class StateOrder extends State<OrderDetail>
                                                   TextDecoration.underline),
                                         ),
                                         onTap: () {
-                                          print(
-                                              orderItem.seller_rating.toString());
+                                          print(orderItem.seller_rating.toString());
                                           print(orderItem.store_name.toString());
                                           print(orderItem.seller_profile);
                                           print(orderItem.seller_name);
@@ -3264,7 +3424,8 @@ class StateOrder extends State<OrderDetail>
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .lightBlack,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                               TextSpan(
                                                   text:
@@ -3329,9 +3490,13 @@ class StateOrder extends State<OrderDetail>
                                 Expanded(
                                   child: OutlinedButton.icon(
                                     onPressed: () {
-                                      print('___________${orderItem.deliveryBoyId}_____3_____');
+                                      print(
+                                          '___________${orderItem.deliveryBoyId}_____3_____');
 
-                                      openDriverBottomSheet(context, '${orderItem.deliveryBoyId}', model.id);
+                                      openDriverBottomSheet(
+                                          context,
+                                          '${orderItem.deliveryBoyId}',
+                                          model.id);
                                     },
                                     icon: Icon(Icons.rate_review_outlined,
                                         color: colors.primary),
@@ -3347,7 +3512,7 @@ class StateOrder extends State<OrderDetail>
                                     ),
                                   ),
                                 ),
-                                if (difference < 1
+                              if (difference < 2
                               //DateTime(widget.model!.delTime.toString()) >
                               // DateTime.now()
                               // !orderItem.listStatus!.contains(DELIVERD) &&
@@ -3355,74 +3520,120 @@ class StateOrder extends State<OrderDetail>
                               // orderItem.isCancle == "1" &&
                               // orderItem.isAlrCancelled == "0"
                               )
-
-                              orderItem.status == DELIVERD || orderItem.status == CANCLED ? SizedBox() :   isTabed ? SizedBox() :  Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
-                                    child: Align(
-                                        alignment: Alignment.bottomRight,
-                                        child: OutlinedButton(
-                                          onPressed: _isReturnClick
-                                              ? isTabed ? null : () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: Text(
-                                                          getTranslated(context,
-                                                              'ARE_YOU_SURE?')!,
-                                                          style: TextStyle(
-                                                              color: Theme.of(context).colorScheme.fontColor),
-                                                        ),
-                                                        content: Text(
-                                                          "Would you like to cancel this product?",
-                                                          style: TextStyle(
-                                                              color: Theme.of(context).colorScheme.fontColor),
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            child: Text(
-                                                              getTranslated(context, 'YES')!,
-                                                              style: TextStyle(color: colors.primary),
-                                                            ),
-                                                            onPressed: () {
-                                                              print('___________${difference}__________');
-                                                              isTabed = true ;
-                                                              Navigator.pop(context);
-                                                              setState(() {
-                                                                _isReturnClick = false;
-                                                                _isProgress = true;
-                                                              });
-                                                              cancelOrder(CANCLED, updateOrderItemApi, model.id);
-                                                            },
-                                                          ),
-                                                          TextButton(
-                                                            child: Text(
-                                                              getTranslated(context, 'NO')!,
-                                                              style: TextStyle(color: colors.primary),
-                                                            ),
-                                                            onPressed: () {
-                                                              Navigator.pop(context);
-                                                            },
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                }: null,
-                                               child: Text("Order Cancel with in a 2 minute", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-                                                  // getTranslated(
-                                                  //   context, 'ITEM_CANCEL')!
+                                // showText?
+                                orderItem.status == DELIVERD ||
+                                        orderItem.status == CANCLED
+                                    ? SizedBox()
+                                    : isTabed
+                                        ? SizedBox()
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  color: colors.primary),
+                                              child: Align(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                child: OutlinedButton(
+                                                  onPressed: _isReturnClick
+                                                      ? isTabed
+                                                          ? null
+                                                          : () {
+                                                              showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (BuildContext
+                                                                        context) {
+                                                                  return AlertDialog(
+                                                                    title: Text(
+                                                                      getTranslated(
+                                                                          context,
+                                                                          'ARE_YOU_SURE?')!,
+                                                                      style: TextStyle(
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .fontColor),
+                                                                    ),
+                                                                    content:
+                                                                        Text(
+                                                                      "Would you like to cancel this product?",
+                                                                      style: TextStyle(
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .fontColor),
+                                                                    ),
+                                                                    actions: [
+                                                                      TextButton(
+                                                                        child:
+                                                                            Text(
+                                                                          getTranslated(
+                                                                              context,
+                                                                              'YES')!,
+                                                                          style:
+                                                                              TextStyle(color: colors.primary),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          print(
+                                                                              '___________${difference}__________');
+                                                                          isTabed =
+                                                                              true;
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          setState(
+                                                                              () {
+                                                                            _isReturnClick =
+                                                                                false;
+                                                                            _isProgress =
+                                                                                true;
+                                                                          });
+                                                                          cancelOrder(
+                                                                              CANCLED,
+                                                                              updateOrderItemApi,
+                                                                              model.id);
+                                                                        },
+                                                                      ),
+                                                                      TextButton(
+                                                                        child:
+                                                                            Text(
+                                                                          getTranslated(
+                                                                              context,
+                                                                              'NO')!,
+                                                                          style:
+                                                                              TextStyle(color: colors.primary),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                        },
+                                                                      ),
+                                                                    ],
+                                                                  );
+                                                                },
+                                                              );
+                                                            }
+                                                      : null,
+                                                  child: Text(
+                                                    "Order Cancel with in a 2 minute",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.white),
+                                                    // getTranslated(
+                                                    //   context, 'ITEM_CANCEL')!
                                                   ),
-                                        ),
-                                    ),
-                                  ),
-                                )
-                              else
+                                                ),
+                                              ),
+                                            ),
+                                          ) else
                                 orderItem.listStatus!.contains(DELIVERD)
-                                    ? SizedBox()/*Padding(
+                                    ? SizedBox()
+                                    /*Padding(
                                         padding:
                                             const EdgeInsets.only(left: 8.0),
                                         child: OutlinedButton(
@@ -3521,7 +3732,7 @@ class StateOrder extends State<OrderDetail>
     );
   }
 
-  bool isTabed = false ;
+  bool isTabed = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -3557,7 +3768,8 @@ class StateOrder extends State<OrderDetail>
         });
   }
 
-  void openDriverBottomSheet(BuildContext context, String? deliveryBoyId, String? orderId) {
+  void openDriverBottomSheet(
+      BuildContext context, String? deliveryBoyId, String? orderId) {
     showModalBottomSheet(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -3580,7 +3792,7 @@ class StateOrder extends State<OrderDetail>
                     writeReviewLabel(),
                     writeReviewField(),
                     // getImageField(),
-                    sendDriverReviewButton(deliveryBoyId,orderId),
+                    sendDriverReviewButton(deliveryBoyId, orderId),
                   ],
                 ),
               ),
@@ -3923,7 +4135,21 @@ class StateOrder extends State<OrderDetail>
     }
   }
 
+  bool showText = true;
+
   Widget getOrderNoAndOTPDetails(OrderModel model) {
+    // print("date timeis herer ${model.dateTime}");
+    // DateTime targetTime = DateTime.parse("${model.dateTime}");
+    //   // Calculate the delay in milliseconds
+    //   int delayInMilliseconds = targetTime.difference(DateTime.now()).inMilliseconds;
+    //   // Schedule the function to be called after the delay
+    //   Timer(Duration(milliseconds: delayInMilliseconds), () {
+    //     // Hide the text after 2 minutes
+    //     setState(() {
+    //       showText = false;
+    //     });
+    //   });
+
     return Card(
       elevation: 0.0,
       child: Padding(

@@ -396,7 +396,7 @@ class _HomePageState extends State<HomePage>
                     //   ),
                     // ),
                     _catList(),
-////////////////////// Today Special Section ////////////////////
+                     //// Today Special Section ////////////////////
                     ///
                     Padding(
                       padding: const EdgeInsets.only(left: 12, top: 16, bottom: 10),
@@ -546,7 +546,7 @@ class _HomePageState extends State<HomePage>
                           }),
                     ),*/
                     // _sponsorSeller(),
-                    _section(),
+                    // _section(),
                   ],
                 ),
               ),
@@ -1521,7 +1521,7 @@ class _HomePageState extends State<HomePage>
   _catList() {
     return Selector<HomeProvider, bool>(
       builder: (context, data, child) {
-        print("checking data here ${data}");
+        print("checking data here $data");
         return data
             ? Container(
                 width: double.infinity,
@@ -2407,6 +2407,7 @@ class _HomePageState extends State<HomePage>
     Map parameter = {
       CAT_FILTER: "false",
     };
+    print("========get categoriess=======$parameter===========");
     apiBaseHelper.postAPICall(getCatApi, parameter).then((getdata) {
       bool error = getdata["error"];
       String? msg = getdata["message"];
@@ -2418,8 +2419,7 @@ class _HomePageState extends State<HomePage>
           var data = getdata["popular_categories"];
           popularList = (data as List).map((data) => new Product.fromCat(data)).toList();
           if (popularList.length > 0) {
-            Product pop =
-                new Product.popular("Popular", imagePath + "popular.svg");
+            Product pop = new Product.popular("Popular", imagePath + "popular.svg");
             catList.insert(0, pop);
             context.read<CategoryProvider>().setSubList(popularList);
           }

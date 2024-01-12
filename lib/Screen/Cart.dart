@@ -1963,6 +1963,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
         ));
   }
 
+
+  String? selfPickup;
   Future<void> _getCart(String save) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
@@ -1990,7 +1992,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           newDeliveryCharge = int.parse(getdata['delivery_charge'].toString());
           print("vvvvvvvvvvvv $newDeliveryCharge");
           newSellerId = data[0]['seller_id'];
-          print("new Seller id here now $newSellerId");
+          selfPickup = data[0]['self_pickup'];
+          print("new Seller id here now $newSellerId $selfPickup");
           // delCharge = double.parse(newDeliveryCharge.toString());
           oriPrice = double.parse(getdata[SUB_TOTAL]);
           platformFee = double.parse(getdata['platform_fee']);
@@ -3219,7 +3222,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             checkoutState = setState;
-            print('___________${totalPrice}___ffgs_______');
+            print('___________${cartList[0].productList![0].selfPickup}___ffgs_______');
             totalPrice = roundUpAbsolute(totalPrice).toDouble();
             return Container(
                 constraints: BoxConstraints(
@@ -3250,7 +3253,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                   const SizedBox(height: 5,),
                                                   address(),
                                                   payment(),
-                                                  cartList[0].productList![0].selfPickup == "1" ?
+                                                  selfPickup == "1" ?
                                                   pickupCustomer(() async {
                                                     setState(() {
                                                       if (pickCustomer) {
@@ -3271,8 +3274,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                           ),
                                           Selector<CartProvider, bool>(
                                             builder: (context, data, child) {
-                                              return showCircularProgress(
-                                                  data, colors.primary);
+                                              return showCircularProgress(data, colors.primary);
                                             },
                                             selector: (_, provider) =>
                                                 provider.isProgress,
@@ -3919,7 +3921,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
   }
 
   Future<void> placeOrder(String? tranId) async {
-    print('___________${totalPrice}__________');
+    print('______newwwwwwwww_____${totalPrice} ${schedule}__________');
 
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
@@ -3985,7 +3987,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           ADD_ID: selAddress,
           ISWALLETBALUSED: isUseWallet! ? "1" : "0",
           WALLET_BAL_USED: usedBal.toString(),
-          'urgent_delivery': choose.toString(),
+          'urgent_delivery': schedule.toString(),
           ORDER_NOTE: noteC.text,
           'add_on_id': finalIdss,
           'seller_id': cartList[0].productList![0].seller_id,
@@ -4034,9 +4036,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
         }
         print(
             "place order parameterrrrrr" + parameter.toString());
-        Response response =
-            await post(placeOrderApi, body: parameter, headers: headers)
-                .timeout(Duration(seconds: timeOut));
+        Response response = await post(placeOrderApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
         _placeOrder = true;
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
@@ -5453,34 +5453,34 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                          ),
                                        ),
                                      ),
-                                     Row(
-                                       children: [
-                                         Radio(
-                                             value: "schedule",
-                                             groupValue: choose,
-                                             activeColor: colors.primary,
-                                             onChanged: (val) {
-                                               setState(() {
-                                                 choose = val;
-                                                 otpOnOff = true;
-                                                 print("selected radio is == $choose");
-                                               });
-                                             }),
-                                         Text("${getTranslated(context, 'SCHEDULE')}", style: TextStyle(fontSize: 13),),
-                                         Radio(
-                                             value: "immediately",
-                                             groupValue: choose,
-                                             activeColor: colors.primary,
-                                             onChanged: (val) {
-                                               setState(() {
-                                                 choose = val;
-                                                 otpOnOff = false;
-                                                 print("selected radio is == $choose");
-                                               });
-                                             }),
-                                         Text("${getTranslated(context, 'IMMADIATELY')}", style: TextStyle(fontSize: 13)),
-                                       ],
-                                     )
+                                     // Row(
+                                     //   children: [
+                                     //     Radio(
+                                     //         value: "schedule",
+                                     //         groupValue: choose,
+                                     //         activeColor: colors.primary,
+                                     //         onChanged: (val) {
+                                     //           setState(() {
+                                     //             choose = val;
+                                     //             otpOnOff = true;
+                                     //             print("selected radio is == $choose");
+                                     //           });
+                                     //         }),
+                                     //     Text("${getTranslated(context, 'SCHEDULE')}", style: TextStyle(fontSize: 13),),
+                                     //     Radio(
+                                     //         value: "immediately",
+                                     //         groupValue: choose,
+                                     //         activeColor: colors.primary,
+                                     //         onChanged: (val) {
+                                     //           setState(() {
+                                     //             choose = val;
+                                     //             otpOnOff = false;
+                                     //             print("selected radio is == $choose");
+                                     //           });
+                                     //         }),
+                                     //     Text("${getTranslated(context, 'IMMADIATELY')}", style: TextStyle(fontSize: 13)),
+                                     //   ],
+                                     // )
                                    ],
                                  ),
                                ),

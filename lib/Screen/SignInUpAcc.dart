@@ -178,6 +178,9 @@ class _SignInUpAccState extends State<SignInUpAcc> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _subLogo(),
+            SizedBox(
+              height: 50,
+            ),
             welcomeEshopTxt(),
             // eCommerceforBusinessTxt(),
             // signInyourAccTxt(),
@@ -185,6 +188,9 @@ class _SignInUpAccState extends State<SignInUpAcc> {
             createAccBtn(),
             skipSignInBtn(),
           ],
-        ))));
+        ),
+            ),
+        ),
+    );
   }
 }

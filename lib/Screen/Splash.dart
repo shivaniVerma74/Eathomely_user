@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:homely_user/Helper/app_assets.dart';
 import 'package:homely_user/Provider/SettingProvider.dart';
 import 'package:homely_user/Screen/Intro_Slider.dart';
+import 'package:homely_user/Screen/Login.dart';
 import 'package:homely_user/Screen/NewLocationPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +70,7 @@ class _SplashScreen extends State<Splash> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => IntroSlider(),
+            builder: (context) => Login(),
           ));
     }
   }

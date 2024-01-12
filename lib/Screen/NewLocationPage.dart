@@ -27,7 +27,7 @@ class _NewLocationPageState extends State<NewLocationPage> {
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      print("checking permission here ${permission}");
+      print("checking permission here $permission");
       if (permission == LocationPermission.deniedForever) {
         return Future.error('Location Not Available');
       }

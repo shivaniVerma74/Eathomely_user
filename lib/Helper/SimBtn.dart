@@ -13,7 +13,6 @@ class SimBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     size=MediaQuery.of(context).size.width *size!;
     return _buildBtnAnimation(context);
   }
@@ -25,16 +24,14 @@ class SimBtn extends StatelessWidget {
           height: 35,
           alignment: FractionalOffset.center,
           decoration: new BoxDecoration(
-
             color: colors.primary,
             borderRadius: new BorderRadius.all(const Radius.circular(5.0)),
           ),
           child: Text(title!,
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1!
-                  .copyWith(color: colors.whiteTemp, fontWeight: FontWeight.normal))),
+              style: Theme.of(context).textTheme.subtitle1!.copyWith(color: colors.whiteTemp, fontWeight: FontWeight.normal),
+          ),
+      ),
       onPressed: () {
         onBtnSelected!();
       },

@@ -227,6 +227,9 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
     );
   }
 
+  dynamic choose = "schedule";
+  bool otpOnOff = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -351,6 +354,36 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                       : Container(),
                                 );
                               }),
+                              Row(
+                                children: [
+                                  Radio(
+                                      value: "schedule",
+                                      groupValue: choose,
+                                      activeColor: colors.primary,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          choose = val;
+                                          otpOnOff = true;
+                                          schedule = "0";
+                                          print("selected radio is == $choose $schedule");
+                                        });
+                                      }),
+                                  Text("${getTranslated(context, 'SCHEDULE')}", style: TextStyle(fontSize: 13),),
+                                  Radio(
+                                      value: "immediately",
+                                      groupValue: choose,
+                                      activeColor: colors.primary,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          choose = val;
+                                          otpOnOff = false;
+                                          schedule = '1';
+                                          print("selected radio is == $choose $schedule");
+                                        });
+                                      }),
+                                  Text("${getTranslated(context, 'IMMADIATELY')}", style: TextStyle(fontSize: 13)),
+                                ],
+                              ),
                               isTimeSlot!
                                   ? Card(
                                       elevation: 0,
@@ -431,7 +464,6 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                                   paymentMethodList.length,
                                               itemBuilder: (context, index) {
                                                 print("checking nnnnnnnn ${index} and ${cod} and ${widget.total} and ${codHideAmount} and ${totalOrderCount} and ${codlimit}");
-
                                                 if (index == 1 &&
                                                     cod == true &&
                                                     totalOrderCount! <
@@ -466,8 +498,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                               }),
                                         ],
                                       ),
-                                    )
-                                  : Container()
+                                    ): Container()
                             ],
                           ),
                         ),

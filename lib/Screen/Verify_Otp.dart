@@ -531,11 +531,11 @@ class _MobileOTPState extends State<VerifyOtp> with TickerProviderStateMixin {
                     color: Theme.of(context).colorScheme.fontColor,
                     fontWeight: FontWeight.normal)),
           ),
-          SizedBox(height: 5,),
-          Text("OTP: ${widget.otp}",
-              style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                  color: Theme.of(context).colorScheme.fontColor,
-                  fontWeight: FontWeight.normal)),
+          // SizedBox(height: 5,),
+          // Text("OTP: ${widget.otp}",
+          //     style: Theme.of(context).textTheme.subtitle1!.copyWith(
+          //         color: Theme.of(context).colorScheme.fontColor,
+          //         fontWeight: FontWeight.normal)),
         ],
       ),
     );

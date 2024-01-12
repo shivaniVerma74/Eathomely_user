@@ -9,7 +9,6 @@ class UserProvider extends ChangeNotifier {
       _profilePic = '',
       _email = '';
   String?  _userId = '';
-
   String? _curPincode = '';
   String? _lat = '';
   String? _lng = '';
@@ -81,8 +80,6 @@ class UserProvider extends ChangeNotifier {
     _lng = count;
   }
 }
-
-
 
 class LocationProvider extends ChangeNotifier{
   var lat;
