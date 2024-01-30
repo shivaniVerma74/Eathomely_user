@@ -247,7 +247,6 @@ class StateOrder extends State<OrderDetail>
      int sub = difference * 60;
      Timer.periodic(Duration(seconds: 1), (Timer timer) {
        print("===========newwwwwwwww====$sub===========");
-
        if(sub > 120) {
          difference =  sub~/60;
          print("time is $sub and diffence $difference");
@@ -259,6 +258,7 @@ class StateOrder extends State<OrderDetail>
       });
     }
   }
+
 Timer ? timer ;
   // void startTimer1(int index) {
   //   timer = Timer.periodic(Duration(seconds: 1), (_) => );
@@ -3619,7 +3619,7 @@ Timer ? timer ;
                                                             }
                                                       : null,
                                                   child: Text(
-                                                    "Order Cancel with in a 2 minute",
+                                                    "Cancel Order with in a 2 minute",
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -3631,7 +3631,7 @@ Timer ? timer ;
                                               ),
                                             ),
                                           ) else
-                                orderItem.listStatus!.contains(DELIVERD)
+                                   orderItem.listStatus!.contains(DELIVERD)
                                     ? SizedBox()
                                     /*Padding(
                                         padding:

@@ -89,7 +89,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
         // activeStatus = jsonResponse['data']['active'].toString();
         totalOrderCount = int.parse(jsonResponse['order_count'].toString());
       });
-      print("total order count here ${totalOrderCount}");
+      print("total order count here $totalOrderCount");
     } else {
       print(response.reasonPhrase);
     }
@@ -240,8 +240,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
           ? _isLoading
               ? getProgress()
               : Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
                   child: Column(
                     children: [
                       Expanded(
@@ -364,7 +363,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                         setState(() {
                                           choose = val;
                                           otpOnOff = true;
-                                          schedule = "0";
+                                          schedule = "schedule";
                                           print("selected radio is == $choose $schedule");
                                         });
                                       }),
@@ -377,7 +376,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                         setState(() {
                                           choose = val;
                                           otpOnOff = false;
-                                          schedule = '1';
+                                          schedule = 'immediately';
                                           print("selected radio is == $choose $schedule");
                                         });
                                       }),
@@ -409,12 +408,10 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                           Divider(),
                                           Container(
                                             height: 90,
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 10),
+                                            padding: EdgeInsets.symmetric(horizontal: 10),
                                             child: ListView.builder(
                                                 shrinkWrap: true,
-                                                scrollDirection:
-                                                    Axis.horizontal,
+                                                scrollDirection: Axis.horizontal,
                                                 itemCount: int.parse(allowDay!),
                                                 itemBuilder: (context, index) {
                                                   return dateCell(index);
@@ -423,8 +420,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                           Divider(),
                                           ListView.builder(
                                               shrinkWrap: true,
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
+                                              physics: NeverScrollableScrollPhysics(),
                                               itemCount: timeModel.length,
                                               itemBuilder: (context, index) {
                                                 return timeSlotItem(index);
@@ -445,7 +441,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                             padding: const EdgeInsets.all(8.0),
                                             child: Text(
                                               getTranslated(
-                                                  context, 'SELECT_PAYMENT')!,
+                                                  context, 'SELECTPAYMENT')!,
                                               style: TextStyle(
                                                 color: Theme.of(context)
                                                     .colorScheme
@@ -463,7 +459,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                               itemCount:
                                                   paymentMethodList.length,
                                               itemBuilder: (context, index) {
-                                                print("checking nnnnnnnn ${index} and ${cod} and ${widget.total} and ${codHideAmount} and ${totalOrderCount} and ${codlimit}");
+                                                print("checking nnnnnnnn $index and $cod and ${widget.total} and $codHideAmount and $totalOrderCount and $codlimit");
                                                 if (index == 1 &&
                                                     cod == true &&
                                                     totalOrderCount! <

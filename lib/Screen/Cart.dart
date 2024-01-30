@@ -3948,13 +3948,13 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       }
       String? payVia;
       if (payMethod == getTranslated(context, 'COD_LBL'))
-        payVia = "UPI";
+        payVia = "Pay After Delivery";
       else if (payMethod == getTranslated(context, 'PAYPAL_LBL'))
         payVia = "PayPal";
       else if (payMethod == getTranslated(context, 'PAYUMONEY_LBL'))
         payVia = "PayUMoney";
       else if (payMethod == getTranslated(context, 'RAZORPAY_LBL'))
-        payVia = "PhonePe";
+        payVia = "Pay Now";
       else if (payMethod == getTranslated(context, 'PAYSTACK_LBL'))
         payVia = "Paystack";
       else if (payMethod == getTranslated(context, 'FLUTTERWAVE_LBL'))
@@ -4064,10 +4064,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             else {
               context.read<UserProvider>().setCartCount("0");
               clearAll();
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => OrderSuccess()),
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => OrderSuccess()),
                   ModalRoute.withName('/home'));
             }
           } else {
