@@ -401,7 +401,7 @@ class _HomePageState extends State<HomePage>
                     Padding(
                       padding: const EdgeInsets.only(left: 12, top: 16, bottom: 10),
                       child: Text(
-                        "Today special",
+                        "Today Special",
                         style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w600),
                       ),

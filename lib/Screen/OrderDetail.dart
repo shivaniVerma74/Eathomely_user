@@ -428,71 +428,73 @@ Timer ? timer ;
         appBar:
             getSimpleAppBar(getTranslated(context, "ORDER_DETAIL")!, context),
         body: _isNetworkAvail
-            ? Stack(
-                children: [
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: getSubHeadingsTabBar(),
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            getOrderDetails(model),
-                            SingleChildScrollView(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: getSingleProduct(model, PROCESSED),
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: getSingleProduct(model, DELIVERD),
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: getSingleProduct(model, CANCLED),
-                              ),
-                            ),
-                            /*SingleChildScrollView(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: getSingleProduct(model, RETURNED),
-                              ),
-                            ),*/
-                          ],
-                        ),
-                      ),
-                      // Expanded(
-                      //   child: getOrderDetails(model),
-                      // ),
-                      // (!widget.model!.itemList![0].listStatus!
-                      //             .contains(DELIVERD) &&
-                      //         (!widget.model!.itemList![0].listStatus!
-                      //             .contains(RETURNED)) &&
-                      //         _isCancleable &&
-                      //         widget.model!.itemList![0].isAlrCancelled == "0")
-                      //     ? cancelable()
-                      //     : (widget.model!.itemList![0].listStatus!
-                      //                 .contains(DELIVERD) &&
-                      //             _isReturnable &&
-                      //             widget.model!.itemList![0].isAlrReturned == "0")
-                      //         ? returnable()
-                      //         : Container(),
-                    ],
-                  ),
-                  showCircularProgress(_isProgress, colors.primary),
-                ],
-              )
+            ? getOrderDetails(model)
+        // Stack(
+        //         children: [
+        //           Column(
+        //             children: [
+        //
+        //               // Padding(
+        //               //   padding: const EdgeInsets.all(8.0),
+        //               //   child: getSubHeadingsTabBar(),
+        //               // ),
+        //               // Expanded(
+        //               //   child: TabBarView(
+        //               //     controller: _tabController,
+        //               //     children: [
+        //               //       getOrderDetails(model),
+        //               //       SingleChildScrollView(
+        //               //         child: Padding(
+        //               //           padding:
+        //               //               const EdgeInsets.symmetric(horizontal: 8.0),
+        //               //           child: getSingleProduct(model, PROCESSED),
+        //               //         ),
+        //               //       ),
+        //               //       SingleChildScrollView(
+        //               //         child: Padding(
+        //               //           padding:
+        //               //               const EdgeInsets.symmetric(horizontal: 8.0),
+        //               //           child: getSingleProduct(model, DELIVERD),
+        //               //         ),
+        //               //       ),
+        //               //       SingleChildScrollView(
+        //               //         child: Padding(
+        //               //           padding:
+        //               //               const EdgeInsets.symmetric(horizontal: 8.0),
+        //               //           child: getSingleProduct(model, CANCLED),
+        //               //         ),
+        //               //       ),
+        //               //       /*SingleChildScrollView(
+        //               //         child: Padding(
+        //               //           padding:
+        //               //               const EdgeInsets.symmetric(horizontal: 8.0),
+        //               //           child: getSingleProduct(model, RETURNED),
+        //               //         ),
+        //               //       ),*/
+        //               //     ],
+        //               //   ),
+        //               // ),
+        //               // Expanded(
+        //               //   child: getOrderDetails(model),
+        //               // ),
+        //               // (!widget.model!.itemList![0].listStatus!
+        //               //             .contains(DELIVERD) &&
+        //               //         (!widget.model!.itemList![0].listStatus!
+        //               //             .contains(RETURNED)) &&
+        //               //         _isCancleable &&
+        //               //         widget.model!.itemList![0].isAlrCancelled == "0")
+        //               //     ? cancelable()
+        //               //     : (widget.model!.itemList![0].listStatus!
+        //               //                 .contains(DELIVERD) &&
+        //               //             _isReturnable &&
+        //               //             widget.model!.itemList![0].isAlrReturned == "0")
+        //               //         ? returnable()
+        //               //         : Container(),
+        //             ],
+        //           ),
+        //           showCircularProgress(_isProgress, colors.primary),
+        //         ],
+        //       )
             : noInternet(context),
       ),
     );
@@ -665,7 +667,21 @@ Timer ? timer ;
                 Text("Total Tax" + " " + ":",
                     style: Theme.of(context).textTheme.button!.copyWith(
                         color: Theme.of(context).colorScheme.lightBlack2)),
-                Text("+ " + CUR_CURRENCY! + " " + "${totalTax}",
+                Text("+ " + CUR_CURRENCY! + " " + "${widget.model!.taxAmt!}",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2))
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: 15.0, end: 15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Total Packing Charge" + " " + ":",
+                    style: Theme.of(context).textTheme.button!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack2)),
+                Text("+ " + CUR_CURRENCY! + " " + "${widget.model!.totalPackingCharge!}",
                     style: Theme.of(context).textTheme.button!.copyWith(
                         color: Theme.of(context).colorScheme.lightBlack2))
               ],

@@ -1010,32 +1010,32 @@ class _LoginPageState extends State<Login> with TickerProviderStateMixin {
                       loginBtn(),
                       // termAndPolicyTxt(),
                       signUpLink(),
-                      InkWell(
-                          onTap: () {
-                            socialLogin();
-                          },
-                          child: Container(
-                            child: Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(100)),
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                      "assets/images/googleIcon.png"),
-                                )),
-                          )
-                          // Container(
-                          //   height: 45,
-                          //   width: MediaQuery.of(context).size.width/2,
-                          //   alignment: Alignment.center,
-                          //   decoration: BoxDecoration(
-                          //     color: colors.primary,
-                          //     borderRadius: BorderRadius.circular(12),
-                          //   ),
-                          //   child: Text("SignIn with Google",style: TextStyle(color: Colors.white,fontSize: 14),),
-                          // ),
-                          ),
+                      // InkWell(
+                      //     onTap: () {
+                      //       socialLogin();
+                      //     },
+                      //     child: Container(
+                      //       child: Card(
+                      //           elevation: 2,
+                      //           shape: RoundedRectangleBorder(
+                      //               borderRadius: BorderRadius.circular(100)),
+                      //           child: Padding(
+                      //             padding: EdgeInsets.all(8.0),
+                      //             child: Image.asset(
+                      //                 "assets/images/googleIcon.png"),
+                      //           )),
+                      //     )
+                      //     // Container(
+                      //     //   height: 45,
+                      //     //   width: MediaQuery.of(context).size.width/2,
+                      //     //   alignment: Alignment.center,
+                      //     //   decoration: BoxDecoration(
+                      //     //     color: colors.primary,
+                      //     //     borderRadius: BorderRadius.circular(12),
+                      //     //   ),
+                      //     //   child: Text("SignIn with Google",style: TextStyle(color: Colors.white,fontSize: 14),),
+                      //     // ),
+                      //     ),
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.10,
                       ),

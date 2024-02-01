@@ -67,11 +67,7 @@ class _SplashScreen extends State<Splash> {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => NewLocationPage()), (route) => false);
     //  Navigator.pushReplacementNamed(context, "/home");
     } else {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Login(),
-          ));
+       checkLogin();
     }
   }
 
@@ -85,6 +81,21 @@ class _SplashScreen extends State<Splash> {
       backgroundColor: Theme.of(context).colorScheme.white,
       elevation: 1.0,
     ));
+  }
+
+  checkLogin(){
+    String? user_id = CUR_USERID.toString();
+    debugPrint("user_id"+ CUR_USERID.toString());
+    if (user_id == null || user_id == ""){
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login(),
+          ));
+    }else{
+      Navigator.pushNamedAndRemoveUntil(context, "/home", (r) => false);
+    }
+
   }
 
   @override

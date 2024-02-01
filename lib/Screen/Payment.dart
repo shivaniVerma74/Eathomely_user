@@ -143,6 +143,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    schedule = "schedule";
     _getdateTime();
     timeSlotList.length = 0;
     Future.delayed(Duration(milliseconds: 200), () {
@@ -384,7 +385,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                                 ],
                               ),
                               isTimeSlot!
-                                  ? Card(
+                                  ? choose=='immediately'?SizedBox.shrink():Card(
                                       elevation: 0,
                                       child: Column(
                                         crossAxisAlignment:

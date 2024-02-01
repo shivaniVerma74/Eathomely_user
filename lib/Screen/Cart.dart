@@ -3223,6 +3223,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
               builder: (BuildContext context, StateSetter setState) {
             checkoutState = setState;
             print('___________${cartList[0].productList![0].selfPickup}___ffgs_______');
+            print('___________${selfPickup}___ffgs_______');
             totalPrice = roundUpAbsolute(totalPrice).toDouble();
             return Container(
                 constraints: BoxConstraints(
@@ -3365,15 +3366,21 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                       msg = getTranslated(
                                                           context,
                                                           'dateWarning');
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (BuildContext
-                                                                      context) =>
-                                                                  Payment(
-                                                                      updateCheckout,
-                                                                      msg,
-                                                                      finalTotalValue)));
+                                                      if(schedule == "immediately"){
+                                                        confirmDialog();
+                                                      }
+                                                      else{
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (BuildContext
+                                                                context) =>
+                                                                    Payment(
+                                                                        updateCheckout,
+                                                                        msg,
+                                                                        finalTotalValue)));
+                                                      }
+
                                                       checkoutState!(() {
                                                         _placeOrder = true;
                                                       });
@@ -3385,15 +3392,20 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                       msg = getTranslated(
                                                           context,
                                                           'timeWarning');
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (BuildContext
-                                                                      context) =>
-                                                                  Payment(
-                                                                      updateCheckout,
-                                                                      msg,
-                                                                      finalTotalValue)));
+                                                      if(schedule == "immediately"){
+                                                        confirmDialog();
+                                                      }
+                                                      else{
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (BuildContext
+                                                                context) =>
+                                                                    Payment(
+                                                                        updateCheckout,
+                                                                        msg,
+                                                                        finalTotalValue)));
+                                                      }
                                                       checkoutState!(() {
                                                         _placeOrder = true;
                                                       });

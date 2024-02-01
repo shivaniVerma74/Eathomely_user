@@ -198,6 +198,7 @@ const String STATUS = 'status';
 const String TOTAL_TAX_PER = 'total_tax_percent';
 const String TOTAL_TAX_AMT = 'total_tax_amount';
 const String PRODUCT_LIMIT = "p_limit";
+const String TOTAL_PACKING_CHARGE = "total_packing_charge";
 const String PRODUCT_OFFSET = "p_offset";
 const String SEC_ID = 'section_id';
 const String COUNTRY_CODE = 'country_code';
