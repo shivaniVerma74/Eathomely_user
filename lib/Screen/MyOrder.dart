@@ -337,13 +337,8 @@ class StateMyOrder extends State<MyOrder> with TickerProviderStateMixin {
               if (data.length != 0) {
                 List<OrderModel> items = [];
                 List<OrderModel> allitems = [];
-
-                items.addAll((data as List)
-                    .map((data) => OrderModel.fromJson(data))
-                    .toList());
-
+                items.addAll((data as List).map((data) => OrderModel.fromJson(data)).toList());
                 allitems.addAll(items);
-
                 for (OrderModel item in items) {
                   searchList.where((i) => i.id == item.id).map((obj) {
                     allitems.remove(item);
@@ -351,7 +346,6 @@ class StateMyOrder extends State<MyOrder> with TickerProviderStateMixin {
                   }).toList();
                 }
                 searchList.addAll(allitems);
-
                 searchList.sort((a, b){
                 return DateTime.parse(b.dateTime.toString()).compareTo(DateTime.parse(a.dateTime.toString()));
                 });

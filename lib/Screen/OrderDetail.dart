@@ -1744,6 +1744,88 @@ Timer ? timer ;
               );
   }
 
+  readyForPickup(String? sDate, String? cDate) {
+    return cDate == null
+        ? Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Column(
+          children: [
+            Container(
+              height: 30,
+              child: VerticalDivider(
+                thickness: 2,
+                color: sDate == null ? Colors.grey : colors.primary,
+              ),
+            ),
+            Icon(
+              Icons.circle,
+              color: sDate == null ? Colors.grey : colors.primary,
+              size: 15,
+            ),
+          ],
+        ),
+        Container(
+          margin: const EdgeInsetsDirectional.only(start: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                getTranslated(context, 'ORDERREDYFORPICKUP')!,
+                style: TextStyle(fontSize: 8),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                sDate ?? " ",
+                style: TextStyle(fontSize: 8),
+              ),
+            ],
+          ),
+        ),
+      ],
+    )
+        : sDate == null
+        ? Container()
+        : Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Column(
+          children: [
+            Container(
+              height: 30,
+              child: VerticalDivider(
+                thickness: 2,
+                color: colors.primary,
+              ),
+            ),
+            Icon(
+              Icons.circle,
+              color: colors.primary,
+              size: 15,
+            ),
+          ],
+        ),
+        Container(
+          margin: const EdgeInsetsDirectional.only(start: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                getTranslated(context, 'ORDERREDYFORPICKUP')!,
+                style: TextStyle(fontSize: 8),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                sDate,
+                style: TextStyle(fontSize: 8),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   getDelivered(String? dDate, String? cDate) {
     return cDate == null
         ? Row(
@@ -2022,11 +2104,9 @@ Timer ? timer ;
         request.headers.addAll(headers);
         request.fields[ORDER_ID] = widget.model!.id!;
 
-        if (files != null) {
-          for (var i = 0; i < files.length; i++) {
-            var pic = await http.MultipartFile.fromPath(ATTACH, files[i].path);
-            request.files.add(pic);
-          }
+        for (var i = 0; i < files.length; i++) {
+          var pic = await http.MultipartFile.fromPath(ATTACH, files[i].path);
+          request.files.add(pic);
         }
 
         var response = await request.send();
@@ -2300,6 +2380,27 @@ Timer ? timer ;
         : Container();
   }
 
+
+
+  _launchMap(lat, lng) async {
+    var url = '';
+
+    if (Platform.isAndroid) {
+      url =
+      "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving&dir_action=navigate";
+    } else {
+      url =
+      "http://maps.apple.com/?saddr=&daddr=$lat,$lng&directionsmode=driving&dir_action=navigate";
+    }
+    await launch(url);
+/*    if (await canLaunch(url)) {
+
+    } else {
+      throw 'Could not launch $url';
+    }*/
+  }
+
+
   bool isButtonVisible = true;
 
   getSingleProduct(OrderModel model, String activeStatus) {
@@ -2326,6 +2427,10 @@ Timer ? timer ;
             if (orderItem.listStatus!.contains(PROCESSED)) {
               prDate =
                   orderItem.listDate![orderItem.listStatus!.indexOf(PROCESSED)];
+            }
+            if (orderItem.listStatus!.contains(FOODPREPAIRED)) {
+              dDate =
+              orderItem.listDate![orderItem.listStatus!.indexOf(FOODPREPAIRED)];
             }
             if (orderItem.listStatus!.contains(SHIPED)) {
               sDate =
@@ -2393,6 +2498,7 @@ Timer ? timer ;
                                       : getPlaced(aDate!),
                                   getProcessed(prDate, cDate),
                                   getShipped(sDate, cDate),
+                                  readyForPickup(sDate, cDate),
                                   getDelivered(dDate, cDate),
                                   getCanceled(cDate),
                                   getReturned(orderItem, rDate, model),
@@ -2437,11 +2543,8 @@ Timer ? timer ;
                                             ? Text(
                                                 "${getTranslated(context, 'COURIER_AGENCY')!}: ",
                                                 style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .lightBlack,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    color: Theme.of(context).colorScheme.lightBlack,
+                                                    fontWeight: FontWeight.bold),
                                               )
                                             : Container(),
                                         orderItem.tracking_id! != ""
@@ -2500,6 +2603,7 @@ Timer ? timer ;
                                         //     color: Theme.of(context).colorScheme.lightBlack2,
                                         //   ),
                                         // ),
+                                        Text("${orderItem.sellerContact}"),
                                         Text("${orderItem.sellerContact}"),
                                         orderItem.courier_agency! != ""
                                             ? Text(
@@ -2782,9 +2886,11 @@ Timer ? timer ;
               ],
             );
           }
-          if ((orderItem.status == SHIPED || orderItem.status == PLACED) &&
+          if ((orderItem.status == SHIPED || orderItem.status == PLACED || orderItem.status == FOODPREPAIRED) &&
               activeStatus == PROCESSED) {
-            String? pDate, prDate, sDate, dDate, cDate, rDate, aDate;
+            String? pDate, prDate, sDate, dDate, cDate, rDate, aDate, fDate;
+
+
 
             if (orderItem.listStatus!.contains(WAITING)) {
               aDate =
@@ -2797,6 +2903,10 @@ Timer ? timer ;
             if (orderItem.listStatus!.contains(PROCESSED)) {
               prDate =
                   orderItem.listDate![orderItem.listStatus!.indexOf(PROCESSED)];
+            }
+            if (orderItem.listStatus!.contains(FOODPREPAIRED)) {
+              fDate =
+              orderItem.listDate![orderItem.listStatus!.indexOf(FOODPREPAIRED)];
             }
             if (orderItem.listStatus!.contains(SHIPED)) {
               sDate =
@@ -2856,6 +2966,7 @@ Timer ? timer ;
                                       : getPlaced(aDate!),
                                   getProcessed(prDate, cDate),
                                   getShipped(sDate, cDate),
+                                  readyForPickup(fDate, cDate),
                                   getDelivered(dDate, cDate),
                                   getCanceled(cDate),
                                   getReturned(orderItem, rDate, model),
@@ -3249,7 +3360,7 @@ Timer ? timer ;
             );
           }
         } else {
-          String? pDate, prDate, sDate, dDate, cDate, rDate, aDate;
+          String? pDate, prDate, sDate, dDate, cDate, rDate, aDate, fDate;
 
           if (orderItem.listStatus!.contains(WAITING)) {
             aDate = orderItem.listDate![orderItem.listStatus!.indexOf(WAITING)];
@@ -3260,6 +3371,10 @@ Timer ? timer ;
           if (orderItem.listStatus!.contains(PROCESSED)) {
             prDate =
                 orderItem.listDate![orderItem.listStatus!.indexOf(PROCESSED)];
+          }
+          if (orderItem.listStatus!.contains(FOODPREPAIRED)) {
+            fDate =
+            orderItem.listDate![orderItem.listStatus!.indexOf(FOODPREPAIRED)];
           }
           if (orderItem.listStatus!.contains(SHIPED)) {
             sDate = orderItem.listDate![orderItem.listStatus!.indexOf(SHIPED)];
@@ -3323,6 +3438,7 @@ Timer ? timer ;
                                     ? getPlaced(pDate)
                                     : getPlaced(aDate!),
                                 getProcessed(prDate, cDate),
+                                 readyForPickup(fDate, cDate),
                                 getShipped(sDate, cDate),
                                 getDelivered(dDate, cDate),
                                 getCanceled(cDate),
@@ -3348,6 +3464,11 @@ Timer ? timer ;
                                       ),
                                       Text(
                                         "Restaurant Contact",
+                                        style: TextStyle(
+                                            color: Theme.of(context).colorScheme.lightBlack, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        "Restaurant Address",
                                         style: TextStyle(
                                             color: Theme.of(context).colorScheme.lightBlack, fontWeight: FontWeight.bold),
                                       ),
@@ -3421,13 +3542,26 @@ Timer ? timer ;
                                       //   ),
                                       // ),
                                       Text("${orderItem.sellerContact}"),
+                                      Row(
+                                          children: [
+                                            Container(
+                                              width: 130,
+                                                child: Text("${orderItem.sellerAddress}", overflow: TextOverflow.ellipsis,)),
+                                            InkWell(
+                                              onTap: () {
+                                                _launchMap(
+                                                    orderItem.sellerLatitude,
+                                                    orderItem.sellerLongitude
+                                                );
+                                              },
+                                                child: Icon(Icons.location_on)),
+                                          ],
+                                      ),
                                       orderItem.courier_agency! != ""
                                           ? Text(
                                               "${orderItem.courier_agency!}",
                                               style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .lightBlack2,
+                                                color: Theme.of(context).colorScheme.lightBlack2,
                                               ),
                                             )
                                           : Container(),
@@ -3437,33 +3571,24 @@ Timer ? timer ;
                                               TextSpan(
                                                 text: "",
                                                 style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .lightBlack,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    color: Theme.of(context).colorScheme.lightBlack,
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                               TextSpan(
                                                   text:
                                                       "${orderItem.courier_agency!}",
                                                   style: const TextStyle(
                                                       color: colors.primary,
-                                                      decoration: TextDecoration
-                                                          .underline),
+                                                      decoration: TextDecoration.underline),
                                                   recognizer:
                                                       TapGestureRecognizer()
                                                         ..onTap = () async {
-                                                          var url =
-                                                              "${orderItem.tracking_url}";
-
-                                                          if (await canLaunch(
-                                                              url)) {
+                                                          var url = "${orderItem.tracking_url}";
+                                                          if (await canLaunch(url)) {
                                                             await launch(url);
                                                           } else {
                                                             setSnackbar(
-                                                                getTranslated(
-                                                                    context,
-                                                                    'URL_ERROR')!);
+                                                                getTranslated(context, 'URL_ERROR')!);
                                                           }
                                                         })
                                             ]))
@@ -3481,11 +3606,9 @@ Timer ? timer ;
                                 Expanded(
                                   child: OutlinedButton.icon(
                                     onPressed: () {
-                                      openBottomSheet(
-                                          context, orderItem.productId);
+                                      openBottomSheet(context, orderItem.productId);
                                     },
-                                    icon: Icon(Icons.rate_review_outlined,
-                                        color: colors.primary),
+                                    icon: Icon(Icons.rate_review_outlined, color: colors.primary),
                                     label: Text(
                                       getTranslated(
                                           context, "WRITE_REVIEW_LBL")!,
@@ -3493,9 +3616,7 @@ Timer ? timer ;
                                     ),
                                     style: OutlinedButton.styleFrom(
                                       side: BorderSide(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .btnColor),
+                                          color: Theme.of(context).colorScheme.btnColor),
                                     ),
                                   ),
                                 ),
@@ -3508,11 +3629,8 @@ Timer ? timer ;
                                     onPressed: () {
                                       print(
                                           '___________${orderItem.deliveryBoyId}_____3_____');
-
                                       openDriverBottomSheet(
-                                          context,
-                                          '${orderItem.deliveryBoyId}',
-                                          model.id);
+                                          context, '${orderItem.deliveryBoyId}', model.id);
                                     },
                                     icon: Icon(Icons.rate_review_outlined,
                                         color: colors.primary),
@@ -3522,10 +3640,8 @@ Timer ? timer ;
                                     ),
                                     style: OutlinedButton.styleFrom(
                                       side: BorderSide(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .btnColor),
-                                    ),
+                                          color: Theme.of(context).colorScheme.btnColor),
+                                    )
                                   ),
                                 ),
                               if (difference < 2
@@ -3537,8 +3653,7 @@ Timer ? timer ;
                               // orderItem.isAlrCancelled == "0"
                               )
                                 // showText?
-                                orderItem.status == DELIVERD ||
-                                        orderItem.status == CANCLED
+                                orderItem.status == DELIVERD || orderItem.status == CANCLED
                                     ? SizedBox()
                                     : isTabed
                                         ? SizedBox()
@@ -3635,10 +3750,9 @@ Timer ? timer ;
                                                             }
                                                       : null,
                                                   child: Text(
-                                                    "Cancel Order with in a 2 minute",
+                                                    "Cancel Order with in 2 minutes",
                                                     style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
+                                                        fontWeight: FontWeight.w600,
                                                         color: Colors.white),
                                                     // getTranslated(
                                                     //   context, 'ITEM_CANCEL')!
@@ -4069,11 +4183,9 @@ Timer ? timer ;
         request.fields[USER_ID] = CUR_USERID!;
         request.fields[PRODUCT_ID] = productID;
 
-        if (files != null) {
-          for (var i = 0; i < files.length; i++) {
-            var pic = await http.MultipartFile.fromPath(IMGS, files[i].path);
-            request.files.add(pic);
-          }
+        for (var i = 0; i < files.length; i++) {
+          var pic = await http.MultipartFile.fromPath(IMGS, files[i].path);
+          request.files.add(pic);
         }
 
         if (comment != "") request.fields[COMMENT] = comment;

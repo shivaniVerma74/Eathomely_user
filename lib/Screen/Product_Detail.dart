@@ -1031,7 +1031,6 @@ class StateItem extends State<ProductDetail> with TickerProviderStateMixin {
                         height: height,
                         width: double.maxFinite,
                         fit: extendImg ? BoxFit.fill : BoxFit.fitWidth,
-
                         imageErrorBuilder: (context, error, stackTrace) =>
                             erroWidget(height),
 

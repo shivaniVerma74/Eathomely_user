@@ -203,25 +203,31 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
   }
 
   var gstPercent;
+  List<dynamic> pincocdeImage = [];
 
   getSetting() async {
+    print("=========ajsdbabdnabd===========");
     var headers = {
       'Cookie': 'ci_session=165041e7253a11a37bc1155c74ed626cb632eb1b'
     };
     var request =
         http.MultipartRequest('POST', Uri.parse('${baseUrl}get_settings'));
-    request.fields.addAll({'user_id': '${CUR_USERID}'});
+    request.fields.addAll({'user_id': '$CUR_USERID'});
+    print("get setting parameter ${request.fields}");
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
-
+   print("====status code ===========${response.statusCode}===========");
     if (response.statusCode == 200) {
+      print("====herer nowwww===========");
       var finalResponse = await response.stream.bytesToString();
       final jsonResponse = json.decode(finalResponse);
+      pincocdeImage = jsonResponse['data']['logo'];
       setState(() {
-        gstPercent =
-            jsonResponse['data']['system_settings'][0]['gst_amount'].toString();
+        gstPercent = jsonResponse['data']['system_settings'][0]['gst_amount'].toString();
+        pincocdeImage = jsonResponse['data']['logo'];
+        print("pincod imageee $pincocdeImage $gstPercent");
       });
-      print("gst percent here ${gstPercent}");
+      print("gst percent here $gstPercent");
     } else {
       print(response.reasonPhrase);
     }
@@ -941,7 +947,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                       TextOverflow.ellipsis,
                                                 ),
                                               ),
-
                                               // Spacer(),
                                               Text(
                                                 e.quantity.toString() +
@@ -973,7 +978,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                       InkWell(
                                         onTap: () {
                                           print('____________________');
-                                          print("cart id here ${cartID}");
+                                          print("cart id here $cartID");
                                           removeAddon(
                                               e.id.toString(),
                                               cartList[index].varientId,
@@ -1999,7 +2004,9 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           platformFee = double.parse(getdata['platform_fee']);
           packagingCharge = double.parse(getdata['total_packing_charge']);
           taxPer = double.parse(getdata[TAX_PER]);
-          totalPrice = delCharge + oriPrice + double.parse(totalTax) + packagingCharge + platformFee;
+          print('${delCharge}_______delCharge___');
+          totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)*taxPer / 100).toString();
+          totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
           print('___________${totalPrice}____kk______');
           List<SectionModel> cartList = (data as List).map((data) => new SectionModel.fromCart(data)).toList();
           context.read<CartProvider>().setCartlist(cartList);
@@ -2874,6 +2881,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
     }
   }
 
+
+
   setSnackbar(
       String msg, GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey) {
     ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
@@ -3089,7 +3098,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                         checkout(cartList);
                                         finalTotalValue = totalPrice.toInt();
                                         print(
-                                            "checking here final value here 11111 ${finalTotalValue}");
+                                            "checking here final value here 11111 $finalTotalValue");
                                       } else {
                                         setSnackbar(
                                             getTranslated(context,
@@ -3257,12 +3266,13 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                   selfPickup == "1" ?
                                                   pickupCustomer(() async {
                                                     setState(() {
+                                                      print(pickCustomer.toString()+"PICKUP");
                                                       if (pickCustomer) {
                                                         pickCustomer = false;
-                                                        totalPrice += (delCharge*days);
+                                                        totalPrice -= (delCharge*days);
                                                       } else {
                                                         pickCustomer = true;
-                                                        totalPrice -= (delCharge*days);
+                                                        totalPrice += (delCharge*days);
                                                       }
                                                     });
                                                   }):
@@ -3500,7 +3510,9 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
         delCharge = double.parse(v['delivery_charges'].toString());
       }
       setState(() {
-        totalPrice += delCharge;
+        //totalPrice += delCharge;
+        totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)*taxPer / 100).toString();
+        totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
       });
     }
   }
@@ -3724,7 +3736,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             if (ISFLAT_DEL) {
               if ((oriPrice) < double.parse(MIN_AMT ?? '0.0')) {
                 delCharge = double.parse(CUR_DEL_CHR!);
-                print("nnnnnnnnnnnn ${delCharge}");
+                print("nnnnnnnnnnnn $delCharge");
               } else
                 delCharge = 0;
             }
@@ -3933,7 +3945,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
   }
 
   Future<void> placeOrder(String? tranId) async {
-    print('______newwwwwwwww_____${totalPrice} ${schedule}__________');
+    print('______newwwwwwwww_____$totalPrice ${schedule}__________');
 
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
@@ -3960,7 +3972,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       }
       String? payVia;
       if (payMethod == getTranslated(context, 'COD_LBL'))
-        payVia = "Pay After Delivery";
+        payVia = "UPI";
       else if (payMethod == getTranslated(context, 'PAYPAL_LBL'))
         payVia = "PayPal";
       else if (payMethod == getTranslated(context, 'PAYUMONEY_LBL'))
@@ -3992,7 +4004,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           QUANTITY: quantity,
           TOTAL: (oriPrice*days).toString(),
           FINAL_TOTAL: payVia == 'Wallet' ? usedBal.toString() : totalPrice.toString(),
-          DEL_CHARGE: pickCustomer ? "0" : (delCharge*days).toString(),
+          DEL_CHARGE: !pickCustomer ? "0" : (delCharge*days).toString(),
           // TAX_AMT: taxAmt.toString(),
           TAX_PER: taxPer.toString(),
           PAYMENT_METHOD: payVia,
@@ -4008,7 +4020,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           'packaging_charge': packageFee.toString(),
           'total_packing_charge': (packagingCharge*days).toString(),
           'platform_fee': (platformFee*days).toString(),
-          'delivery_type': pickCustomer ? "1" : "2",
+          'delivery_type': pickCustomer ? "2" : "1",
           'product_order_type': subscription?"subscription_order":"order",
           'startdate': startCon.text.toString(),
           'enddate': endCon.text.toString(),
@@ -4017,7 +4029,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           // 'cgst': cgst.toString(),
           //  'sgst': sgst.toString(),
         };
-
         if (addressList[selectedAddress!]
             .state
             .toString()
@@ -4081,7 +4092,12 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             }
           } else {
             print("ddddddddddddddddddddddddd");
-            setSnackbar(msg!, _checkscaffoldKey);
+           // setSnackbar(msg!, _checkscaffoldKey);
+            final snackBar = SnackBar(
+              content: customSnackbarImage(msg ?? ''),
+              duration: Duration(seconds: 3),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
             context.read<CartProvider>().setProgress(false);
           }
         }
@@ -4206,6 +4222,24 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
   //     rethrow;
   //   }
   // }
+
+Widget customSnackbarImage(String msg) {
+    return Center(
+      child: Column(children: [
+        ClipRRect(
+          // borderRadius: BorderRadius.circular(10.0),
+          child: Container(
+             // width: 40.0,
+              height: 120.0,
+              color: Colors.grey.withOpacity(0.3),
+              child: Image.network(pincocdeImage.first ??'')
+          ),
+        ),
+        Text(msg)
+      ],),
+    );
+
+}
 
   String _getReference() {
     String platform;
@@ -4706,7 +4740,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                     padding: const EdgeInsetsDirectional.only(start: 8.0),
                     child: Text(
                       //SELECT_PAYMENT,
-                      "Pickup By Customer",
+                      "Delivery Service",
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.fontColor,
                           fontWeight: FontWeight.bold),
@@ -4916,7 +4950,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                         )
                       ],
                     ),
-              !pickCustomer
+              pickCustomer
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -4930,11 +4964,11 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.fontColor,
                               fontWeight: FontWeight.bold),
-                        )
+                        ),
                       ],
                     )
                   : const SizedBox(),
-              isPromoValid!
+                  isPromoValid!
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -5238,7 +5272,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                   )
                                 ],
                               ),*/
-                                     !pickCustomer
+                                     pickCustomer
                                          ? Row(
                                        mainAxisAlignment:
                                        MainAxisAlignment.spaceBetween,

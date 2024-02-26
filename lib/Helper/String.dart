@@ -211,6 +211,7 @@ const String PLACED = 'received';
 const String SHIPED = 'shipped';
 const String PROCESSED = 'processed';
 const String DELIVERD = 'delivered';
+const String FOODPREPAIRED = 'food prepared';
 const String CANCLED = 'cancelled';
 const String ASSIGNED = 'driver assigned';
 const String PREPAIRED = 'food prepare';

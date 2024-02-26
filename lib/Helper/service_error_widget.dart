@@ -25,7 +25,7 @@ class _ServiceErrorWidgetState extends State<ServiceErrorWidget> {
           Padding(
             padding: const EdgeInsets.only(left: 19, right: 10),
             child: Text(
-              "“Dear Customer!! Thanks for your interest. Our services are not available in this pin code at present!! We will inform you when we start services in your area!! You can still change the address an enjoy the service from available area.",
+              "“Dear Customer!! Thanks for your interest. Our services are not available in this pin code at present!! We will inform you when we start services in your area!! You can still change the address and enjoy the service from available area.",
               style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w600,decoration: TextDecoration.none),
             ),
           ),

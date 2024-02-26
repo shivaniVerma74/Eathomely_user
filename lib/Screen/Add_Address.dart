@@ -16,9 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:http/http.dart';
-
 import 'package:provider/provider.dart';
-
 import '../Helper/AppBtn.dart';
 import '../Helper/Color.dart';
 import '../Helper/String.dart';
@@ -789,9 +787,7 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                                 .length >
                                 2) {
                               List<String> cityList = result
-                                  .formattedAddress
-                                  .toString()
-                                  .split(",");
+                                  .formattedAddress.toString().split(",");
                               setState(() {
                                 /*_cityController.text =
                                         cityList[cityList.length - 3];*/
@@ -888,35 +884,21 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                                   : "AIzaSyDi_XlHtopewZHtpWWxIO-EQ7mCegHr5o0",
                               onPlacePicked: (result) {
                                 print(result.formattedAddress);
-
-                                latitude =
-                                    result.geometry!.location.lat.toString();
-                                longitude =
-                                    result.geometry!.location.lng.toString();
-                                addressC!.text =
-                                    result.formattedAddress.toString();
-                                if (result.formattedAddress
-                                        .toString()
-                                        .split(",")
-                                        .length >
-                                    2) {
-                                  List<String> cityList = result
-                                      .formattedAddress
-                                      .toString()
-                                      .split(",");
+                                latitude = result.geometry!.location.lat.toString();
+                                longitude = result.geometry!.location.lng.toString();
+                                addressC!.text = result.formattedAddress.toString();
+                                if (result.formattedAddress.toString().split(",").length > 2) {
+                                  List<String> cityList = result.formattedAddress.toString().split(",");
                                   setState(() {
                                     /*_cityController.text =
                                         cityList[cityList.length - 3];*/
-                                    _areaController.text =
-                                    cityList[cityList.length - 4];
-                                    stateC!.text =
-                                        cityList[cityList.length - 2];
+                                    _areaController.text = cityList[cityList.length - 4];
+                                    stateC!.text = cityList[cityList.length - 2];
                                     /*pincodeC!.text =
                                         cityList[cityList.length - 2]
                                             .split(" ")
                                             .last;*/
-                                    countryC!.text =
-                                        cityList[cityList.length - 1];
+                                    countryC!.text = cityList[cityList.length - 1];
                                   });
                                 }
                                 /*getAddress(
@@ -935,8 +917,7 @@ class StateAddress extends State<AddAddress> with TickerProviderStateMixin {
                                 //  getBookInfo();
                                 // getRides("3");
                               },
-                              initialPosition:
-                                  LatLng(latitudeFirst, longitudeFirst),
+                              initialPosition: LatLng(latitudeFirst, longitudeFirst),
                               useCurrentLocation: true,
                             ),
                           ),

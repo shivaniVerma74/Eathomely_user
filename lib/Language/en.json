@@ -132,6 +132,7 @@
   "ORDER_DATE": "Order Date",
   "ORDER_PROCESSED": "Order Preparing",
   "ORDER_SHIPPED": "Order Picked Up",
+  "ORDERREDYFORPICKUP": "Order Ready For Pickup",
   "ORDER_DELIVERED": "Order Delivered",
   "ORDER_NPLACED": "Order Placed",
   "ORDER_CANCLED": "Order Cancelled",

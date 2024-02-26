@@ -273,7 +273,7 @@ class _SellerListState extends State<SellerList> {
         "cat_id": "${widget.catId}"
       };
     }
-    print("ok now here go ${parameter} and new ${getSellerApi}");
+    print("ok now here go $parameter and new $getSellerApi");
     apiBaseHelper.postAPICall(getSellerApi, parameter).then((getdata) {
       print(parameter);
       bool error = getdata["error"];
@@ -282,12 +282,10 @@ class _SellerListState extends State<SellerList> {
         var data = getdata["data"];
         sellerLists =
             (data as List).map((data) => new Product.fromSeller(data)).toList();
-
         setState(() {});
       } else {
         setSnackbar(msg!);
       }
-
       context.read<HomeProvider>().setSellerLoading(false);
     }, onError: (error) {
       setSnackbar(error.toString());

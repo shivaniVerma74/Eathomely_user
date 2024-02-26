@@ -34,6 +34,7 @@ String zipCode = "";
 List<User> addressList = [];
 //List<SectionModel> cartList = [];
 List<Promo> promoList = [];
+//2009,3514
 double totalPrice = 0, oriPrice = 0, delCharge = 0, taxPer = 0, platformFee = 0, packagingCharge = 0;
 int? selectedAddress = 0;
 String? selAddress, payMethod = '', selTime, selDate, promocode, schedule, immediately;
