@@ -46,14 +46,8 @@ class _FavoriteRestaurantState extends State<FavoriteRestaurant> {
       if (jsonResponse['error'] == false) {
         var data = jsonResponse["data"];
        // List<Product> data = jsonResponse["data"]  ;
-
-
-
         setState(() {
           restList = (data as List).map((data) => new Product.fromSeller(data)).toList();
-
-
-
           restList.sort((a, b) => b.online!.compareTo(a.online!));
         });
 
@@ -168,7 +162,9 @@ class _FavoriteRestaurantState extends State<FavoriteRestaurant> {
                                             sellerId:
                                                 restList[index].id.toString(),
                                             sellerData: restList[index],
-                                          )));
+                                          ),
+                                  ),
+                              );
                             } else {
                               setSnackbar("HomeKitchen is Close!!", context);
                             }
@@ -206,7 +202,7 @@ class _FavoriteRestaurantState extends State<FavoriteRestaurant> {
                                             fadeInDuration:
                                                 Duration(milliseconds: 150),
                                             image: CachedNetworkImageProvider(
-                                              "${imageUrl}${restList[index].image}",
+                                              "$imageUrl${restList[index].image}",
                                             ),
                                             fit: BoxFit.cover,
                                             imageErrorBuilder:

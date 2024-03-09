@@ -266,7 +266,7 @@ class _HomePageState extends State<HomePage>
       "lat": "$latitude",
       "lang": "$longitude",
     };
-    print(parameter);
+    print("toop rarraraar pararar $parameter");
     // if (pin != '') {
     //   parameter = {
     //     "lat":"$latitude",
@@ -398,15 +398,15 @@ class _HomePageState extends State<HomePage>
                     _catList(),
                      //// Today Special Section ////////////////////
                     ///
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, top: 16, bottom: 10),
-                      child: Text(
-                        "Today Special",
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    todayCatWidget(),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 12, top: 16, bottom: 10),
+                    //   child: Text(
+                    //     "Today Special",
+                    //     style: TextStyle(
+                    //         fontSize: 14, fontWeight: FontWeight.w600),
+                    //   ),
+                    // ),
+                    // todayCatWidget(),
                     _seller(),
                     _topSeller(),
                     /*Padding(

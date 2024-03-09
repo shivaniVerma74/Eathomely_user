@@ -320,9 +320,7 @@ class StateMyOrder extends State<MyOrder> with TickerProviderStateMixin {
               parameter[ACTIVE_STATUS] = activeStatus;
             }
             print("get order api and para $getOrderApi and $parameter");
-            Response response =
-                await post(getOrderApi, body: parameter, headers: headers)
-                    .timeout(Duration(seconds: timeOut));
+            Response response = await post(getOrderApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
             var getdata = json.decode(response.body);
             bool error = getdata["error"];
             print(getOrderApi.toString());

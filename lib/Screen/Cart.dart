@@ -2004,7 +2004,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
           platformFee = double.parse(getdata['platform_fee']);
           packagingCharge = double.parse(getdata['total_packing_charge']);
           taxPer = double.parse(getdata[TAX_PER]);
-          print('${delCharge}_______delCharge___');
           totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)*taxPer / 100).toString();
           totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
           print('___________${totalPrice}____kk______');
@@ -3269,10 +3268,14 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                       print(pickCustomer.toString()+"PICKUP");
                                                       if (pickCustomer) {
                                                         pickCustomer = false;
-                                                        totalPrice -= (delCharge*days);
+                                                        totalTax = ((oriPrice + packagingCharge + platformFee)* taxPer / 100).toString();
+                                                        totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
+                                                       // totalPrice -= (delCharge*days);
                                                       } else {
                                                         pickCustomer = true;
-                                                        totalPrice += (delCharge*days);
+                                                        totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)* taxPer / 100).toString();
+                                                        totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
+                                                       // totalPrice += (delCharge*days);
                                                       }
                                                     });
                                                   }):
@@ -3296,8 +3299,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                       ),
                                     ),
                                     Container(
-                                      color:
-                                          Theme.of(context).colorScheme.white,
+                                      color: Theme.of(context).colorScheme.white,
                                       child: Row(children: <Widget>[
                                         Padding(
                                             padding: EdgeInsetsDirectional.only(
@@ -3310,17 +3312,15 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                   CUR_CURRENCY! +
                                                       " ${totalPrice.toStringAsFixed(2)}",
                                                   style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .fontColor,
+                                                      color: Theme.of(context).colorScheme.fontColor,
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
                                                 Text(
-                                                    cartList.length.toString() +
-                                                        " Items"),
+                                                    cartList.length.toString() + " Items"),
                                               ],
-                                            )),
+                                            ),
+                                        ),
                                         Spacer(),
                                         SimBtn(
                                             size: 0.4,
@@ -3331,7 +3331,6 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                     checkoutState!(() {
                                                       _placeOrder = false;
                                                     });
-
                                                     if (selAddress == null ||
                                                         selAddress!.isEmpty) {
                                                       msg = getTranslated(
@@ -3345,7 +3344,8 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
                                                                 ManageAddress(
                                                               home: false,
                                                             ),
-                                                          ));
+                                                          ),
+                                                      );
                                                       checkoutState!(() {
                                                         _placeOrder = true;
                                                       });
@@ -3509,9 +3509,11 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
       for (var v in response['data']) {
         delCharge = double.parse(v['delivery_charges'].toString());
       }
+      print('${delCharge}_______________________dsdfsffsd');
       setState(() {
         //totalPrice += delCharge;
-        totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)*taxPer / 100).toString();
+
+        totalTax = ((delCharge + oriPrice + packagingCharge + platformFee)* taxPer / 100).toString();
         totalPrice =   oriPrice + double.parse(totalTax) + packagingCharge + platformFee +( !pickCustomer?0:delCharge);
       });
     }
@@ -4092,7 +4094,7 @@ class StateCart extends State<Cart> with TickerProviderStateMixin {
             }
           } else {
             print("ddddddddddddddddddddddddd");
-           // setSnackbar(msg!, _checkscaffoldKey);
+           setSnackbar(msg!, _checkscaffoldKey);
             final snackBar = SnackBar(
               content: customSnackbarImage(msg ?? ''),
               duration: Duration(seconds: 3),
@@ -4230,7 +4232,7 @@ Widget customSnackbarImage(String msg) {
           // borderRadius: BorderRadius.circular(10.0),
           child: Container(
              // width: 40.0,
-              height: 120.0,
+              height: 100.0,
               color: Colors.grey.withOpacity(0.3),
               child: Image.network(pincocdeImage.first ??'')
           ),
@@ -4950,7 +4952,7 @@ Widget customSnackbarImage(String msg) {
                         )
                       ],
                     ),
-              pickCustomer
+                  pickCustomer
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -4985,11 +4987,11 @@ Widget customSnackbarImage(String msg) {
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.fontColor,
                               fontWeight: FontWeight.bold),
-                        )
+                        ),
                       ],
                     )
                   : Container(),
-              isUseWallet!
+                  isUseWallet!
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -5003,13 +5005,14 @@ Widget customSnackbarImage(String msg) {
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.fontColor,
                               fontWeight: FontWeight.bold),
-                        )
+                        ),
                       ],
                     )
                   : Container(),
-            ],
-          ),
-        ));
+               ],
+            ),
+         ),
+    );
   }
 
   Future<void> validatePromo(bool check) async {
@@ -5042,20 +5045,14 @@ Widget customSnackbarImage(String msg) {
               promoAmt = 0.0;
             });
             totalPrice = double.parse(data["final_total"]) +
-                delCharge +
-                double.parse(totalTax);
+                delCharge + double.parse(totalTax);
             print("final discount is here now ${data['final_discount']}");
             promoAmt = double.parse(data["final_discount"]);
             promocode = data["promo_code"];
             print("checking promocode data here now $promocode");
             isPromoValid = true;
-
-            if (promoAmt == "" ||
-                promoAmt == null ||
-                promoAmt == 0 ||
-                promoAmt == 0.0) {
+            if (promoAmt == "" || promoAmt == null || promoAmt == 0 || promoAmt == 0.0) {
             } else {}
-
             setSnackbar(
                 getTranslated(context, 'PROMO_SUCCESS')!, _checkscaffoldKey);
             // _getCart("");

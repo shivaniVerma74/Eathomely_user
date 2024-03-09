@@ -23,7 +23,7 @@ const int perPage = 1000;
 /*final String baseUrl =
     'https://eatoz.in/app/v1/api/';*/
 
-final String baseUrl = "https://developmentalphawizz.com/eatoz_clone/app/v1/api/";
+  final String baseUrl = "https://developmentalphawizz.com/eatoz_clone/app/v1/api/";
  //final String baseUrl = "https://developmentalphawizz.com/eatoz/app/v1/api/";
 final String imageUrl = 'https://developmentalphawizz.com/';
 //final String imageUrl = 'https://foodontheways.com/';

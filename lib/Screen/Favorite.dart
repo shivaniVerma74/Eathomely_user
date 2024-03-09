@@ -107,42 +107,44 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
     return Scaffold(
         appBar: getAppBar(getTranslated(context, 'FAVORITE')!, context),
         body: _isNetworkAvail
-            ? Stack(
-                children: <Widget>[
-                  Container(
-                    child: Column(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        FavoriteRestaurant()));
-                          },
-                          child: Container(
-                            height: 40,
-                            margin:
-                                EdgeInsets.only(left: 70, right: 70, top: 20),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: colors.primary)),
-                            alignment: Alignment.center,
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Text(
-                              "Favorite Restaurant",
-                              style: TextStyle(color: colors.primary),
+            ? SingleChildScrollView(
+              child: Stack(
+                  children: <Widget>[
+                    Container(
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          FavoriteRestaurant()));
+                            },
+                            child: Container(
+                              height: 40,
+                              margin:
+                                  EdgeInsets.only(left: 70, right: 70, top: 20),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: colors.primary)),
+                              alignment: Alignment.center,
+                              width: MediaQuery.of(context).size.width / 2,
+                              child: Text(
+                                "Favorite Food",
+                                style: TextStyle(color: colors.primary),
+                              ),
                             ),
                           ),
-                        ),
-                        _showContent(context),
-                      ],
+                          _showContent(context),
+                        ],
+                      ),
                     ),
-                  ),
-                  showCircularProgress(_isProgress, colors.primary),
-                ],
-              )
+                    showCircularProgress(_isProgress, colors.primary),
+                  ],
+                ),
+            )
             : noInternet(context));
   }
 
@@ -205,7 +207,6 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                   height: 125.0,
                                   width: 110.0,
                                   fit: extendImg ? BoxFit.fill : BoxFit.contain,
-
                                   imageErrorBuilder:
                                       (context, error, stackTrace) =>
                                           erroWidget(125),
@@ -213,6 +214,7 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                   // errorWidget: (context, url, e) => placeHolder(80),
                                   placeholder: placeHolder(125),
                                 ),
+
                                 Positioned.fill(
                                     child: favList[index].availability == "0"
                                         ? Container(
@@ -236,8 +238,10 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                               ),
                                             ),
                                           )
-                                        : Container()),
-                                off != 0
+                                        : Container(),
+                                ),
+
+                                   off != 0
                                     ? Container(
                                         decoration: BoxDecoration(
                                             color: colors.red,
@@ -257,7 +261,9 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                       )
                                     : Container(),
                               ],
-                            ))),
+                            ),
+                        ),
+                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsetsDirectional.only(start: 8.0),
@@ -281,6 +287,7 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
+
                                 Container(
                                   padding: EdgeInsets.only(right: 5),
                                   child: InkWell(
@@ -353,6 +360,18 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                                           letterSpacing: 0.7),
                                 ),
                               ],
+                            ),
+                            Text(
+                              favList[index].store_name!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle1!
+                                  .copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .lightBlack),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             /*  Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -433,12 +452,12 @@ class StateFav extends State<Favorite> with TickerProviderStateMixin {
                     PageRouteBuilder(
                         pageBuilder: (_, __, ___) => ProductDetail(
                               model: model,
-
                               secPos: 0,
                               index: index,
                               list: true,
                               //  title: productList[index].name,
-                            )),
+                            ),
+                    ),
                   );
                 },
               ),

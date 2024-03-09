@@ -1388,7 +1388,6 @@ String? vegValue;
                             ),
                           )
                         : Container(),
-
                     // Align(
                     //   alignment: Alignment.topLeft,
                     //   child: Container(
@@ -1419,8 +1418,6 @@ String? vegValue;
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           //Todo undo comment
-
-
                           model.availability == "0" && !cartBtnList
                               ? Container()
                               : _controller[index].text == "0"

@@ -7,17 +7,18 @@ class OrderModel {
   String? id,
       name,
       mobile,
-      delCharge,product_order_type,
+      delCharge,
+      product_order_type,
       walBal,
       promo,
       promoDis,
       payMethod,
-  totalPackingCharge,
+      totalPackingCharge,
       total,
       subTotal,
       payable,
       address,
-        taxAmt,
+      taxAmt,
       taxPer,
       orderDate,
       dateTime,
@@ -42,46 +43,46 @@ class OrderModel {
   List<String> listStatus = [];
   List<String?>? listDate = [];
 
-  OrderModel(
-      {this.id,
-      this.name,
-      this.mobile,
-      this.delCharge,
-        this.product_order_type,
-      this.walBal,
-      this.promo,
-      this.promoDis,
-      this.payMethod,
-      this.total,
-      this.subTotal,
-      this.payable,
-      this.address,
-      this.taxPer,
-       this.taxAmt,
-      this.orderDate,
-      this.dateTime,
-        this.sgst,
-        this.totalPackingCharge,
-        this.cgst,
-        this.igst,
-      this.itemList,
-      required this.listStatus,
-      this.listDate,
-      this.isReturnable,
-      this.isCancleable,
-      this.isAlrCancelled,
-      this.isAlrReturned,
-      this.rtnReqSubmitted,
-      this.activeStatus,
-      this.otp,
-      this.invoice,
-      this.delDate,
-      this.delTime,
-      this.addonList,
-      this.deliveryBoyId,
-      this.attachList,
-        this.deliveryTime,
-      });
+  OrderModel({
+    this.id,
+    this.name,
+    this.mobile,
+    this.delCharge,
+    this.product_order_type,
+    this.walBal,
+    this.promo,
+    this.promoDis,
+    this.payMethod,
+    this.total,
+    this.subTotal,
+    this.payable,
+    this.address,
+    this.taxPer,
+    this.taxAmt,
+    this.orderDate,
+    this.dateTime,
+    this.sgst,
+    this.totalPackingCharge,
+    this.cgst,
+    this.igst,
+    this.itemList,
+    required this.listStatus,
+    this.listDate,
+    this.isReturnable,
+    this.isCancleable,
+    this.isAlrCancelled,
+    this.isAlrReturned,
+    this.rtnReqSubmitted,
+    this.activeStatus,
+    this.otp,
+    this.invoice,
+    this.delDate,
+    this.delTime,
+    this.addonList,
+    this.deliveryBoyId,
+    this.attachList,
+    this.deliveryTime,
+  });
 
   factory OrderModel.fromJson(Map<String, dynamic> parsedJson) {
     List<OrderItem> itemList = [];
@@ -94,9 +95,8 @@ class OrderModel {
     String date = parsedJson[DATE_ADDED];
     date = DateFormat('dd-MM-yyyy').format(DateTime.parse(date));
 
-
     List<AddOnModel> addList = [];
-    if(parsedJson['add_ons']!=null){
+    if (parsedJson['add_ons'] != null) {
       addList = (parsedJson['add_ons'] as List)
           .map((data) => new AddOnModel.fromJson(data))
           .toList();
@@ -124,7 +124,7 @@ class OrderModel {
         subTotal: parsedJson[TOTAL],
         payable: parsedJson[TOTAL_PAYABLE],
         address: parsedJson[ADDRESS] ?? "",
-           taxAmt: parsedJson[TOTAL_TAX_AMT],
+        taxAmt: parsedJson[TOTAL_TAX_AMT],
         taxPer: parsedJson[TOTAL_TAX_PER],
         dateTime: parsedJson[DATE_ADDED],
         isCancleable: parsedJson[ISCANCLEABLE],
@@ -189,7 +189,9 @@ class OrderItem {
       tracking_url,
       deliveryBoyName,
       deliveryBoyNumber,
-      deliveryBoyId,startdate,totaldelivery;
+      deliveryBoyId,
+      startdate,
+      totaldelivery;
 
   List<String>? listStatus = [];
   List<String>? listDate = [];
@@ -198,7 +200,8 @@ class OrderItem {
     this.qty,
     this.activeStatus,
     this.id,
-    this.startdate,this.totaldelivery,
+    this.startdate,
+    this.totaldelivery,
     this.name,
     this.price,
     this.subTotal,
@@ -246,7 +249,7 @@ class OrderItem {
     return new OrderItem(
       id: json[ID],
       qty: json[QUANTITY],
-      activeStatus:  json[ACTIVE_STATUS],
+      activeStatus: json[ACTIVE_STATUS],
       startdate: json['startdate'],
       totaldelivery: json['totaldelivery'],
       name: json[NAME],
@@ -285,7 +288,7 @@ class OrderItem {
     );
   }
 }
- 
+
 class Attachment {
   String? id, attachment, bankTranStatus;
 
@@ -308,15 +311,15 @@ class AddOnModel {
   String? totalAmount;
   String? quantity;
 
-  AddOnModel(
-      {this.id,
-        this.productId,
-        this.price,
-        this.image,
-        this.name,
-        this.quantity,
-        this.totalAmount,
-      });
+  AddOnModel({
+    this.id,
+    this.productId,
+    this.price,
+    this.image,
+    this.name,
+    this.quantity,
+    this.totalAmount,
+  });
 
   AddOnModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
